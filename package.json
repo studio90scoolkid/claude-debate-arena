@@ -1,0 +1,35 @@
+{
+  "name": "ai-debate",
+  "displayName": "AI Debate Arena",
+  "description": "Two AI agents debate topics in a retro RPG style interface using Claude CLI",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "debate.start",
+        "title": "AI Debate: Start Debate Arena"
+      },
+      {
+        "command": "debate.stop",
+        "title": "AI Debate: Stop Current Debate"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0"
+  }
+}

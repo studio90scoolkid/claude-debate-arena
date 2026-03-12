@@ -1,0 +1,216 @@
+import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+import { randomBytes } from 'crypto';
+
+export function getWebviewContent(
+  _webview: vscode.Webview,
+  extensionUri: vscode.Uri,
+  lang: string,
+): string {
+  const mediaDir = path.join(extensionUri.fsPath, 'out', 'media');
+  const cssContent = fs.readFileSync(path.join(mediaDir, 'style.css'), 'utf-8');
+  const jsContent = fs.readFileSync(path.join(mediaDir, 'main.js'), 'utf-8');
+
+  // Load sprite sheets as base64 data URIs
+  const spritesDir = path.join(mediaDir, 'sprites');
+  const spriteData: Record<string, string> = {};
+  // Load all sprite PNGs from sprites dir (idle + hit for all characters)
+  try {
+    const files = fs.readdirSync(spritesDir).filter(f => f.endsWith('.png'));
+    for (const file of files) {
+      const filePath = path.join(spritesDir, file);
+      try {
+        const buf = fs.readFileSync(filePath);
+        // key: "mask-dude" for idle, "mask-dude-hit" for hit
+        const key = file.replace('-idle.png', '').replace('.png', '');
+        spriteData[key] = `data:image/png;base64,${buf.toString('base64')}`;
+      } catch { /* skip unreadable files */ }
+    }
+  } catch { /* sprites dir not found */ }
+
+  const nonce = randomBytes(16).toString('hex');
+  const langMap: Record<string, string> = {
+    ko: 'ko', ja: 'ja', zh: 'zh', de: 'de', fr: 'fr', es: 'es', pt: 'pt',
+    it: 'it', nl: 'nl', pl: 'pl', ru: 'ru', uk: 'uk', cs: 'cs', sv: 'sv',
+    da: 'da', fi: 'fi', nb: 'nb', no: 'no', tr: 'tr', el: 'el', hu: 'hu',
+    ro: 'ro', th: 'th', vi: 'vi', id: 'id', ms: 'ms', hi: 'hi', bn: 'bn',
+    ar: 'ar', he: 'he', fa: 'fa',
+  };
+  const prefix = lang.split('-')[0].toLowerCase();
+  const htmlLang = langMap[prefix] || 'en';
+
+  const spriteJson = JSON.stringify(spriteData);
+
+  return `<!DOCTYPE html>
+<html lang="${htmlLang}" data-lang="${htmlLang}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none';
+             style-src 'nonce-${nonce}';
+             script-src 'nonce-${nonce}';
+             img-src data:;">
+  <title>AI Debate Arena</title>
+  <style nonce="${nonce}">${cssContent}</style>
+</head>
+<body>
+  <!-- Sprite data injected from extension -->
+  <script nonce="${nonce}">window.__SPRITE_DATA__ = ${spriteJson};</script>
+
+  <!-- Top Title Bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="title">AI DEBATE ARENA</div>
+      <div class="subtitle">STUDIO COOLKID</div>
+    </div>
+    <div class="connection-status" id="connectionStatus">
+      <span class="conn-dot" id="connDot"></span>
+      <span class="conn-text" id="connText" data-i18n="checking"></span>
+      <button class="conn-refresh" id="connRefresh" title="Refresh">&#x21bb;</button>
+    </div>
+  </div>
+
+  <!-- Setup Panel -->
+  <div class="setup-panel">
+    <div class="topic-row">
+      <input type="text" id="topicInput" class="topic-input" data-i18n-placeholder="topicPlaceholder">
+    </div>
+    <div class="persona-row">
+      <div class="agent-config">
+        <div class="agent-config-label agent-a-label">
+          <input type="text" id="nameA" class="name-input agent-a-name" value="AGENT A" maxlength="20">
+        </div>
+        <div class="agent-config-selects">
+          <div class="persona-group">
+            <label data-i18n="persona"></label>
+            <select id="personaA" class="persona-select">
+              <option value="pro" selected data-i18n="pro"></option>
+              <option value="neutral" data-i18n="neutral"></option>
+              <option value="con" data-i18n="con"></option>
+            </select>
+          </div>
+          <div class="persona-group">
+            <label data-i18n="character"></label>
+            <select id="charA" class="persona-select char-select">
+              <optgroup label="Heroes">
+                <option value="mask-dude" selected data-i18n="charMaskDude"></option>
+                <option value="ninja-frog" data-i18n="charNinjaFrog"></option>
+                <option value="pink-man" data-i18n="charPinkMan"></option>
+                <option value="virtual-guy" data-i18n="charVirtualGuy"></option>
+              </optgroup>
+              <optgroup label="Creatures">
+                <option value="angry-pig" data-i18n="charAngryPig"></option>
+                <option value="bat" data-i18n="charBat"></option>
+                <option value="bee" data-i18n="charBee"></option>
+                <option value="blue-bird" data-i18n="charBlueBird"></option>
+                <option value="bunny" data-i18n="charBunny"></option>
+                <option value="chameleon" data-i18n="charChameleon"></option>
+                <option value="chicken" data-i18n="charChicken"></option>
+                <option value="duck" data-i18n="charDuck"></option>
+                <option value="fat-bird" data-i18n="charFatBird"></option>
+                <option value="ghost" data-i18n="charGhost"></option>
+                <option value="mushroom" data-i18n="charMushroom"></option>
+                <option value="plant" data-i18n="charPlant"></option>
+                <option value="radish" data-i18n="charRadish"></option>
+                <option value="rino" data-i18n="charRino"></option>
+                <option value="rock" data-i18n="charRock"></option>
+                <option value="skull" data-i18n="charSkull"></option>
+                <option value="slime" data-i18n="charSlime"></option>
+                <option value="snail" data-i18n="charSnail"></option>
+                <option value="trunk" data-i18n="charTrunk"></option>
+                <option value="turtle" data-i18n="charTurtle"></option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="persona-group">
+            <label data-i18n="model"></label>
+            <select id="modelA" class="persona-select model-select">
+              <option value="haiku" data-i18n="modelHaiku"></option>
+              <option value="sonnet" selected data-i18n="modelSonnet"></option>
+              <option value="opus" data-i18n="modelOpus"></option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="vs-divider">VS</div>
+      <div class="agent-config">
+        <div class="agent-config-label agent-b-label">
+          <input type="text" id="nameB" class="name-input agent-b-name" value="AGENT B" maxlength="20">
+        </div>
+        <div class="agent-config-selects">
+          <div class="persona-group">
+            <label data-i18n="persona"></label>
+            <select id="personaB" class="persona-select">
+              <option value="pro" data-i18n="pro"></option>
+              <option value="neutral" data-i18n="neutral"></option>
+              <option value="con" selected data-i18n="con"></option>
+            </select>
+          </div>
+          <div class="persona-group">
+            <label data-i18n="character"></label>
+            <select id="charB" class="persona-select char-select">
+              <optgroup label="Heroes">
+                <option value="mask-dude" data-i18n="charMaskDude"></option>
+                <option value="ninja-frog" selected data-i18n="charNinjaFrog"></option>
+                <option value="pink-man" data-i18n="charPinkMan"></option>
+                <option value="virtual-guy" data-i18n="charVirtualGuy"></option>
+              </optgroup>
+              <optgroup label="Creatures">
+                <option value="angry-pig" data-i18n="charAngryPig"></option>
+                <option value="bat" data-i18n="charBat"></option>
+                <option value="bee" data-i18n="charBee"></option>
+                <option value="blue-bird" data-i18n="charBlueBird"></option>
+                <option value="bunny" data-i18n="charBunny"></option>
+                <option value="chameleon" data-i18n="charChameleon"></option>
+                <option value="chicken" data-i18n="charChicken"></option>
+                <option value="duck" data-i18n="charDuck"></option>
+                <option value="fat-bird" data-i18n="charFatBird"></option>
+                <option value="ghost" data-i18n="charGhost"></option>
+                <option value="mushroom" data-i18n="charMushroom"></option>
+                <option value="plant" data-i18n="charPlant"></option>
+                <option value="radish" data-i18n="charRadish"></option>
+                <option value="rino" data-i18n="charRino"></option>
+                <option value="rock" data-i18n="charRock"></option>
+                <option value="skull" data-i18n="charSkull"></option>
+                <option value="slime" data-i18n="charSlime"></option>
+                <option value="snail" data-i18n="charSnail"></option>
+                <option value="trunk" data-i18n="charTrunk"></option>
+                <option value="turtle" data-i18n="charTurtle"></option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="persona-group">
+            <label data-i18n="model"></label>
+            <select id="modelB" class="persona-select model-select">
+              <option value="haiku" data-i18n="modelHaiku"></option>
+              <option value="sonnet" selected data-i18n="modelSonnet"></option>
+              <option value="opus" data-i18n="modelOpus"></option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button id="startBtn" class="rpg-btn primary" data-i18n="startBattle"></button>
+        <button id="pauseBtn" class="rpg-btn warning" disabled data-i18n="pause"></button>
+        <button id="stopBtn" class="rpg-btn danger" disabled data-i18n="stop"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Area -->
+  <div id="chatArea" class="chat-area"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span><span id="statusDot" class="status-dot"></span><span id="statusText" data-i18n="ready"></span></span>
+    <span id="connInfo" class="conn-info"></span>
+    <span id="tokenInfo" class="token-info"></span>
+    <span id="msgCount" data-i18n="messages"></span>
+  </div>
+
+  <script nonce="${nonce}">${jsContent}</script>
+</body>
+</html>`;
+}
