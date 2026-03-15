@@ -2,7 +2,7 @@
   "name": "claude-talk",
   "displayName": "Claude Talk",
   "description": "Two AI agents debate any topic to spark insights, expand ideas, and explore deeper — powered by Claude CLI",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "STUDIOCOOLKID",
   "license": "MIT",
   "repository": {

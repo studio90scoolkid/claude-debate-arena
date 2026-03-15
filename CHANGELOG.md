@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.2] - 2026-03-15
+
+### Fixed
+- README icon now uses absolute URL for correct marketplace display
+
 ## [0.1.1] - 2026-03-15
 
 ### Changed
