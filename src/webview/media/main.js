@@ -1021,6 +1021,8 @@
       personaB: personaBSelect.value,
       modelA: modelASelect.value,
       modelB: modelBSelect.value,
+      nameA: nameAInput.value || 'Agent A',
+      nameB: nameBInput.value || 'Agent B',
     });
   });
 

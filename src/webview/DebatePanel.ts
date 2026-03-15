@@ -137,6 +137,8 @@ export class DebatePanel {
             (message.personaB as Persona) || 'con',
             (message.modelA as ModelAlias) || 'sonnet',
             (message.modelB as ModelAlias) || 'sonnet',
+            message.nameA || 'Agent A',
+            message.nameB || 'Agent B',
           );
         }
         break;

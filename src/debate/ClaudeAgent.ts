@@ -151,6 +151,7 @@ export class ClaudeAgent {
     public readonly name: string,
     public readonly persona: Persona,
     public readonly model: ModelAlias = 'sonnet',
+    public readonly opponentName: string = 'Agent B',
   ) {}
 
   async respond(
@@ -174,10 +175,17 @@ export class ClaudeAgent {
       const olderTurns = totalHistory.slice(0, -recentCount);
       const recentTurns = totalHistory.slice(-recentCount);
 
+      // Determine which side this agent is: if last message is from B (or no history), we are A
+      const iAmA = history.length === 0 || history[history.length - 1]?.agent === 'B';
+      const nameForAgent = (agent: 'A' | 'B') => {
+        if (iAmA) { return agent === 'A' ? this.name : this.opponentName; }
+        return agent === 'B' ? this.name : this.opponentName;
+      };
+
       if (olderTurns.length > 0) {
         historyText += '\n\n--- 이전 논점 요약 ---\n';
         for (const msg of olderTurns) {
-          const label = msg.agent === 'A' ? 'A' : 'B';
+          const label = nameForAgent(msg.agent);
           const firstSentence = msg.content.split(/[.!?。！？]\s*/)[0];
           const summary = firstSentence.length > SUMMARY_MESSAGE_LENGTH
             ? firstSentence.slice(0, SUMMARY_MESSAGE_LENGTH) + '...'
@@ -189,7 +197,7 @@ export class ClaudeAgent {
 
       historyText += '\n--- 최근 토론 ---\n';
       for (const msg of recentTurns) {
-        const label = `${msg.agent === 'A' ? 'Agent A' : 'Agent B'} (${PERSONA_LABELS[msg.persona]})`;
+        const label = `${nameForAgent(msg.agent)} (${PERSONA_LABELS[msg.persona]})`;
         const content = msg.content.length > MAX_MESSAGE_LENGTH
           ? msg.content.slice(0, MAX_MESSAGE_LENGTH) + '...'
           : msg.content;
@@ -215,7 +223,7 @@ export class ClaudeAgent {
 토론 주제: "${topic}"
 ${historyText}
 당신은 ${this.name} (${PERSONA_LABELS[this.persona]}) 입장입니다. (현재 ${turnNumber}번째 발언)
-${turnNumber === 1 ? '첫 번째 발언으로 자신의 입장을 명확히 밝혀주세요.' : '상대방의 마지막 발언에 대해 반론하세요.'}
+${turnNumber === 1 ? '첫 번째 발언으로 자신의 입장을 명확히 밝혀주세요.' : `${this.opponentName}의 마지막 발언에 대해 반론하세요.`}
 
 중요 지시사항:
 - ${strategyHint}

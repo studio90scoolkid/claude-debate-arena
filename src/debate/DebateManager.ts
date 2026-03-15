@@ -20,6 +20,8 @@ export class DebateManager extends EventEmitter {
 
   private abortController: AbortController | null = null;
   private loopId = 0;
+  private _nameA = 'Agent A';
+  private _nameB = 'Agent B';
 
   getState(): DebateState {
     return { ...this.state, messages: [...this.state.messages] };
@@ -31,6 +33,8 @@ export class DebateManager extends EventEmitter {
     personaB: Persona = 'con',
     modelA: ModelAlias = 'sonnet',
     modelB: ModelAlias = 'sonnet',
+    nameA = 'Agent A',
+    nameB = 'Agent B',
   ): Promise<void> {
     // Stop any existing debate
     if (this.state.status === 'running' || this.state.status === 'paused') {
@@ -47,6 +51,8 @@ export class DebateManager extends EventEmitter {
       personaB,
     };
 
+    this._nameA = nameA || 'Agent A';
+    this._nameB = nameB || 'Agent B';
     this.abortController = new AbortController();
     const myLoopId = ++this.loopId;
 
@@ -99,9 +105,10 @@ export class DebateManager extends EventEmitter {
     const MAX_RETRIES = 2;
 
     while (id === this.loopId && this.state.status === 'running') {
-      const currentAgent = this.state.currentTurn === 'A'
-        ? new ClaudeAgent('Agent A', this.state.personaA, modelA)
-        : new ClaudeAgent('Agent B', this.state.personaB, modelB);
+      const isA = this.state.currentTurn === 'A';
+      const currentAgent = isA
+        ? new ClaudeAgent(this._nameA, this.state.personaA, modelA, this._nameB)
+        : new ClaudeAgent(this._nameB, this.state.personaB, modelB, this._nameA);
       const currentPersona = this.state.currentTurn === 'A' ? this.state.personaA : this.state.personaB;
 
       this.emit('thinking', this.state.currentTurn);
