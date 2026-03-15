@@ -52,7 +52,7 @@ export function getWebviewContent(
              style-src 'nonce-${nonce}';
              script-src 'nonce-${nonce}';
              img-src data:;">
-  <title>AI Debate Arena</title>
+  <title>Claude Talk</title>
   <style nonce="${nonce}">${cssContent}</style>
 </head>
 <body>
@@ -62,7 +62,7 @@ export function getWebviewContent(
   <!-- Top Title Bar -->
   <div class="top-bar">
     <div class="top-bar-left">
-      <div class="title">AI DEBATE ARENA</div>
+      <div class="title">CLAUDE TALK</div>
       <div class="subtitle">STUDIO COOLKID</div>
     </div>
     <div class="connection-status" id="connectionStatus">

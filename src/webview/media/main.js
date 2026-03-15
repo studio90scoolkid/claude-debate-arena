@@ -30,7 +30,7 @@
       paused: 'PAUSED',
       stopped: 'STOPPED',
       messages: 'MESSAGES: 0',
-      welcomeTitle: '⚔ AI DEBATE ARENA ⚔',
+      welcomeTitle: '⚔ CLAUDE TALK ⚔',
       welcomeDesc: 'Enter a topic and press START BATTLE to begin an all-out debate between two AI agents!',
       welcomeHint: 'Powered by Claude CLI',
       personaLabels: { pro: 'FOR', neutral: 'NEUTRAL', con: 'AGAINST' },

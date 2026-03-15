@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1] - 2026-03-15
+
+### Changed
+- Renamed to Claude Talk
+- Updated extension icon
+- Improved marketplace description and README
+
 ## [0.1.0] - 2026-03-13
 
 ### Added

@@ -1,8 +1,8 @@
 {
-  "name": "ai-debate-arena",
-  "displayName": "AI Debate Arena",
-  "description": "Watch two AI agents battle in a retro RPG debate arena — powered by Claude CLI",
-  "version": "0.1.0",
+  "name": "claude-talk",
+  "displayName": "Claude Talk",
+  "description": "Two AI agents debate any topic to spark insights, expand ideas, and explore deeper — powered by Claude CLI",
+  "version": "0.1.1",
   "publisher": "STUDIOCOOLKID",
   "license": "MIT",
   "repository": {
@@ -10,11 +10,11 @@
     "url": "https://github.com/studio90scoolkid/claude-debate-arena"
   },
   "icon": "icon.png",
-  "keywords": ["ai", "debate", "claude", "rpg", "arena", "anthropic", "pixel-art", "entertainment"],
+  "keywords": ["ai", "debate", "claude", "rpg", "talk", "anthropic", "pixel-art", "entertainment"],
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Entertainment"],
+  "categories": ["Other"],
   "galleryBanner": {
     "color": "#1a1a2e",
     "theme": "dark"
@@ -25,11 +25,11 @@
     "commands": [
       {
         "command": "debate.start",
-        "title": "AI Debate: Start Debate Arena"
+        "title": "Claude Talk: Start"
       },
       {
         "command": "debate.stop",
-        "title": "AI Debate: Stop Current Debate"
+        "title": "Claude Talk: Stop"
       }
     ]
   },

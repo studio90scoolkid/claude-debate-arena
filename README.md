@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="icon.png" width="128" height="128" alt="AI Debate Arena">
+  <img src="icon.png" width="256" height="256" alt="Claude Talk">
 </p>
 
-<h1 align="center">AI Debate Arena</h1>
+<h1 align="center">Claude Talk</h1>
 
 <p align="center">
-  <strong>Watch two AI agents battle it out in a retro RPG-style debate arena — right inside VS Code.</strong>
+  <strong>Watch two AI agents debate any topic in a retro RPG-style interface — right inside VS Code.</strong>
 </p>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=STUDIOCOOLKID.ai-debate-arena"><img src="https://img.shields.io/visual-studio-marketplace/v/STUDIOCOOLKID.ai-debate-arena?style=flat-square&color=blue" alt="Version"></a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=STUDIOCOOLKID.ai-debate-arena"><img src="https://img.shields.io/visual-studio-marketplace/i/STUDIOCOOLKID.ai-debate-arena?style=flat-square&color=green" alt="Installs"></a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=STUDIOCOOLKID.ai-debate-arena"><img src="https://img.shields.io/visual-studio-marketplace/r/STUDIOCOOLKID.ai-debate-arena?style=flat-square&color=yellow" alt="Rating"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=STUDIOCOOLKID.claude-talk"><img src="https://img.shields.io/visual-studio-marketplace/v/STUDIOCOOLKID.claude-talk?style=flat-square&color=blue" alt="Version"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=STUDIOCOOLKID.claude-talk"><img src="https://img.shields.io/visual-studio-marketplace/i/STUDIOCOOLKID.claude-talk?style=flat-square&color=green" alt="Installs"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=STUDIOCOOLKID.claude-talk"><img src="https://img.shields.io/visual-studio-marketplace/r/STUDIOCOOLKID.claude-talk?style=flat-square&color=yellow" alt="Rating"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-brightgreen?style=flat-square" alt="License"></a>
 </p>
 
@@ -19,9 +19,19 @@
 
 ## What is this?
 
-**AI Debate Arena** pits two Claude-powered AI agents against each other to debate any topic you choose. Each agent takes a stance (Pro, Neutral, or Con) and argues its position in real-time — all rendered in a pixel-art RPG battle interface.
+**Claude Talk** pits two Claude-powered AI agents against each other to debate any topic you choose. Each agent takes a stance (Pro, Neutral, or Con) and argues its position in real-time — all rendered in a pixel-art RPG battle interface.
 
 > Pick a topic. Choose your fighters. Hit START. Grab some popcorn.
+
+### Why use Claude Talk?
+
+Two AI agents debating from different perspectives can do more than entertain:
+
+- **Gain fresh insights** — uncover angles you hadn't considered on difficult problems
+- **Expand your ideas** — watch agents build on and challenge a concept from multiple directions
+- **Deep-dive any topic** — explore philosophy, architecture decisions, ethical dilemmas, or technical trade-offs in depth
+- **Break through dead ends** — when you're stuck, let two opposing viewpoints spark a new path forward
+- **Learn by observation** — see how structured arguments are built, countered, and refined in real time
 
 ---
 
@@ -46,7 +56,7 @@
 
 1. Install [Claude CLI](https://docs.anthropic.com/en/docs/claude-cli) and authenticate (`claude login`)
 2. Install this extension from the VS Code Marketplace
-3. Open Command Palette → **AI Debate: Start Debate Arena**
+3. Open Command Palette → **Claude Talk: Start**
 4. Enter a topic, pick characters & stances, and hit **START**
 
 ---
@@ -84,14 +94,14 @@ This means debates stay interesting even after 10+ exchanges.
 
 | Command | Description |
 |---------|-------------|
-| `AI Debate: Start Debate Arena` | Open the debate arena panel |
-| `AI Debate: Stop Current Debate` | Stop an ongoing debate |
+| `Claude Talk: Start` | Open the Claude Talk panel |
+| `Claude Talk: Stop` | Stop an ongoing debate |
 
 ---
 
 ## Supported Languages
 
-🌍 English, 한국어, 日本語, 中文, Español, Français, Deutsch, Português, Italiano, Русский, العربية, हिन्दी, Tiếng Việt, ไทย, Bahasa Indonesia, Bahasa Melayu, Filipino, Türkçe, Polski, Nederlands, Svenska, Norsk, Dansk, Suomi, Čeština, Română, Magyar, Ελληνικά, עברית, Українська, فارسی, বাংলা
+English, 한국어, 日本語, 中文, Español, Français, Deutsch, Português, Italiano, Русский, العربية, हिन्दी, Tiếng Việt, ไทย, Bahasa Indonesia, Bahasa Melayu, Filipino, Türkçe, Polski, Nederlands, Svenska, Norsk, Dansk, Suomi, Čeština, Română, Magyar, Ελληνικά, עברית, Українська, فارسی, বাংলা
 
 ---
 

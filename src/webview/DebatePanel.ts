@@ -89,7 +89,7 @@ export class DebatePanel {
 
     const panel = vscode.window.createWebviewPanel(
       DebatePanel.viewType,
-      'AI Debate Arena',
+      'Claude Talk',
       column,
       {
         enableScripts: true,
