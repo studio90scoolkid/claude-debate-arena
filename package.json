@@ -2,12 +2,12 @@
   "name": "claude-talk",
   "displayName": "Claude Talk",
   "description": "Two AI agents debate any topic to spark insights, expand ideas, and explore deeper — powered by Claude CLI",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "publisher": "STUDIOCOOLKID",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/studio90scoolkid/claude-debate-arena"
+    "url": "https://github.com/studio90scoolkid/claude-talk"
   },
   "icon": "icon.png",
   "keywords": ["ai", "debate", "claude", "rpg", "talk", "anthropic", "pixel-art", "entertainment"],

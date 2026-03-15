@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0] - 2026-03-15
+
+### Added
+- Seek Consensus mode — agents gradually find common ground instead of debating endlessly
+- Auto-stop when consensus is reached with visual banner notification
+- Consensus checkbox with RPG-styled UI
+
+### Changed
+- Improved button layout — compact vertical arrangement in setup panel
+- GitHub repository renamed to claude-talk
+
 ## [0.1.2] - 2026-03-15
 
 ### Fixed

@@ -22,6 +22,7 @@ export class DebateManager extends EventEmitter {
   private loopId = 0;
   private _nameA = 'Agent A';
   private _nameB = 'Agent B';
+  private _seekConsensus = false;
 
   getState(): DebateState {
     return { ...this.state, messages: [...this.state.messages] };
@@ -35,6 +36,7 @@ export class DebateManager extends EventEmitter {
     modelB: ModelAlias = 'sonnet',
     nameA = 'Agent A',
     nameB = 'Agent B',
+    seekConsensus = false,
   ): Promise<void> {
     // Stop any existing debate
     if (this.state.status === 'running' || this.state.status === 'paused') {
@@ -53,6 +55,7 @@ export class DebateManager extends EventEmitter {
 
     this._nameA = nameA || 'Agent A';
     this._nameB = nameB || 'Agent B';
+    this._seekConsensus = seekConsensus;
     this.abortController = new AbortController();
     const myLoopId = ++this.loopId;
 
@@ -107,8 +110,8 @@ export class DebateManager extends EventEmitter {
     while (id === this.loopId && this.state.status === 'running') {
       const isA = this.state.currentTurn === 'A';
       const currentAgent = isA
-        ? new ClaudeAgent(this._nameA, this.state.personaA, modelA, this._nameB)
-        : new ClaudeAgent(this._nameB, this.state.personaB, modelB, this._nameA);
+        ? new ClaudeAgent(this._nameA, this.state.personaA, modelA, this._nameB, this._seekConsensus)
+        : new ClaudeAgent(this._nameB, this.state.personaB, modelB, this._nameA, this._seekConsensus);
       const currentPersona = this.state.currentTurn === 'A' ? this.state.personaA : this.state.personaB;
 
       this.emit('thinking', this.state.currentTurn);
@@ -146,11 +149,25 @@ export class DebateManager extends EventEmitter {
         usage: response.usage,
       };
 
+      // Strip consensus marker from displayed text
+      const hasConsensus = response.text.includes('[CONSENSUS_REACHED]');
+      if (hasConsensus) {
+        message.content = message.content.replace(/\s*\[CONSENSUS_REACHED\]\s*/g, '').trim();
+      }
+
       this.state.messages.push(message);
       if (this.state.messages.length > MAX_MESSAGES) {
         this.state.messages = this.state.messages.slice(-MAX_MESSAGES);
       }
       this.emit('message', message);
+
+      // Auto-stop when consensus is reached
+      if (this._seekConsensus && hasConsensus) {
+        this.state.status = 'stopped';
+        this.emit('consensus');
+        this.emitStateChange();
+        return;
+      }
 
       this.state.currentTurn = this.state.currentTurn === 'A' ? 'B' : 'A';
 

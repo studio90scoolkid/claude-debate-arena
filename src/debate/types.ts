@@ -35,6 +35,7 @@ export interface WebviewMessage {
   modelB?: ModelAlias;
   nameA?: string;
   nameB?: string;
+  seekConsensus?: boolean;
   settings?: Record<string, string>;
 }
 

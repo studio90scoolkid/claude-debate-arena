@@ -152,6 +152,7 @@ export class ClaudeAgent {
     public readonly persona: Persona,
     public readonly model: ModelAlias = 'sonnet',
     public readonly opponentName: string = 'Agent B',
+    public readonly seekConsensus: boolean = false,
   ) {}
 
   async respond(
@@ -208,26 +209,55 @@ export class ClaudeAgent {
 
     // Turn-aware strategy instruction
     let strategyHint = '';
-    if (turnNumber <= 2) {
-      strategyHint = '핵심 입장과 가장 강력한 근거를 제시하세요.';
-    } else if (turnNumber <= 6) {
-      strategyHint = '이전에 다루지 않은 새로운 근거, 데이터, 또는 사례를 반드시 포함하세요. 이미 언급한 논점을 반복하지 마세요.';
-    } else if (turnNumber <= 12) {
-      strategyHint = '지금까지와 완전히 다른 각도(경제적/사회적/윤리적/기술적/역사적 관점)에서 새로운 논점을 제시하세요. 기존 주장을 반복하면 안 됩니다.';
+    let consensusHint = '';
+
+    if (this.seekConsensus) {
+      // Consensus-seeking mode: gradually move toward agreement
+      if (turnNumber <= 2) {
+        strategyHint = '핵심 입장과 가장 강력한 근거를 제시하세요.';
+        consensusHint = '';
+      } else if (turnNumber <= 4) {
+        strategyHint = '자신의 입장을 유지하면서도, 상대 주장 중 일부 타당한 점이 있다면 인정하세요.';
+        consensusHint = '단, 아직 자신의 핵심 입장은 양보하지 마세요. 상대의 좋은 논점을 인정하는 정도로만 하세요.';
+      } else if (turnNumber <= 6) {
+        strategyHint = '상대 주장의 핵심 논거에 대해 부분적으로 동의하면서, 양측의 입장을 조율할 수 있는 접점을 탐색하세요.';
+        consensusHint = '자신의 관점을 완전히 버리지 말되, "이 부분에서는 동의한다", "조건부로 수용할 수 있다" 같은 표현을 자연스럽게 사용하세요.';
+      } else if (turnNumber <= 8) {
+        strategyHint = '양측의 핵심 우려를 모두 반영한 절충안이나 통합적 해결책을 제안하세요.';
+        consensusHint = '상대의 핵심 가치를 존중하면서 자신의 핵심 가치도 포함하는 방향으로 합의점을 구체적으로 제시하세요.';
+      } else {
+        strategyHint = '지금까지의 토론을 종합하여, 양측이 모두 수용할 수 있는 최종 합의안을 정리하세요.';
+        consensusHint = '합의에 도달했다면 "[CONSENSUS_REACHED]"를 발언 끝에 포함하세요. 아직 차이가 있다면 남은 쟁점을 명확히 하고 타협점을 제시하세요.';
+      }
     } else {
-      strategyHint = '상대방 논리의 전제 자체에 의문을 제기하거나, 양측이 놓친 제3의 관점을 제시하세요. 절대 이전 발언을 반복하지 마세요.';
+      // Original debate mode
+      if (turnNumber <= 2) {
+        strategyHint = '핵심 입장과 가장 강력한 근거를 제시하세요.';
+      } else if (turnNumber <= 6) {
+        strategyHint = '이전에 다루지 않은 새로운 근거, 데이터, 또는 사례를 반드시 포함하세요. 이미 언급한 논점을 반복하지 마세요.';
+      } else if (turnNumber <= 12) {
+        strategyHint = '지금까지와 완전히 다른 각도(경제적/사회적/윤리적/기술적/역사적 관점)에서 새로운 논점을 제시하세요. 기존 주장을 반복하면 안 됩니다.';
+      } else {
+        strategyHint = '상대방 논리의 전제 자체에 의문을 제기하거나, 양측이 놓친 제3의 관점을 제시하세요. 절대 이전 발언을 반복하지 마세요.';
+      }
     }
+
+    const actionLine = turnNumber === 1
+      ? '첫 번째 발언으로 자신의 입장을 명확히 밝혀주세요.'
+      : this.seekConsensus && turnNumber > 4
+        ? `${this.opponentName}의 마지막 발언을 고려하여 합의점을 모색하며 답변하세요.`
+        : `${this.opponentName}의 마지막 발언에 대해 반론하세요.`;
 
     return `${personaInstruction}
 
 토론 주제: "${topic}"
 ${historyText}
 당신은 ${this.name} (${PERSONA_LABELS[this.persona]}) 입장입니다. (현재 ${turnNumber}번째 발언)
-${turnNumber === 1 ? '첫 번째 발언으로 자신의 입장을 명확히 밝혀주세요.' : `${this.opponentName}의 마지막 발언에 대해 반론하세요.`}
+${actionLine}
 
 중요 지시사항:
 - ${strategyHint}
-- 이전 요약에 나온 논점을 그대로 되풀이하지 마세요.
+${consensusHint ? `- ${consensusHint}\n` : ''}- 이전 요약에 나온 논점을 그대로 되풀이하지 마세요.
 - 반드시 토론 주제가 작성된 언어와 동일한 언어로 답변하세요.
 - 3~5문장으로 간결하게 답변하세요. 마크다운 형식을 사용하지 마세요.`;
   }

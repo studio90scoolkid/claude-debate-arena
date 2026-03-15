@@ -69,6 +69,12 @@ export class DebatePanel {
       }
     });
 
+    this.debateManager.on('consensus', () => {
+      if (!this.disposed) {
+        this.panel.webview.postMessage({ type: 'consensus', payload: null });
+      }
+    });
+
     // Auto-check connection when panel opens
     this.checkConnection();
 
@@ -139,6 +145,7 @@ export class DebatePanel {
             (message.modelB as ModelAlias) || 'sonnet',
             message.nameA || 'Agent A',
             message.nameB || 'Agent B',
+            message.seekConsensus || false,
           );
         }
         break;

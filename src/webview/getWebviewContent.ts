@@ -147,6 +147,10 @@ export function getWebviewContent(
         <button id="startBtn" class="rpg-btn primary" data-i18n="startBattle"></button>
         <button id="pauseBtn" class="rpg-btn warning" disabled data-i18n="pause"></button>
         <button id="stopBtn" class="rpg-btn danger" disabled data-i18n="stop"></button>
+        <label class="consensus-label">
+          <input type="checkbox" id="seekConsensus">
+          <span data-i18n="seekConsensus"></span>
+        </label>
       </div>
     </div>
   </div>

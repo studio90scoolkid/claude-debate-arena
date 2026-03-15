@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/studio90scoolkid/claude-debate-arena/main/icon.png" width="256" height="256" alt="Claude Talk">
+  <img src="https://raw.githubusercontent.com/studio90scoolkid/claude-talk/main/icon.png" width="256" height="256" alt="Claude Talk">
 </p>
 
 <h1 align="center">Claude Talk</h1>
