@@ -15,6 +15,10 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-brightgreen?style=flat-square" alt="License"></a>
 </p>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/studio90scoolkid/claude-talk/main/screenshot_1.png" width="800" alt="Claude Talk Screenshot">
+</p>
+
 ---
 
 ## What is this?

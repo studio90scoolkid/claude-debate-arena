@@ -23,6 +23,12 @@ export class DebateManager extends EventEmitter {
   private _nameA = 'Agent A';
   private _nameB = 'Agent B';
   private _seekConsensus = false;
+  private _modelA: ModelAlias = 'sonnet';
+  private _modelB: ModelAlias = 'sonnet';
+
+  // Persistent agents — maintain their own Claude CLI sessions
+  private agentA: ClaudeAgent | null = null;
+  private agentB: ClaudeAgent | null = null;
 
   getState(): DebateState {
     return { ...this.state, messages: [...this.state.messages] };
@@ -56,11 +62,18 @@ export class DebateManager extends EventEmitter {
     this._nameA = nameA || 'Agent A';
     this._nameB = nameB || 'Agent B';
     this._seekConsensus = seekConsensus;
+    this._modelA = modelA;
+    this._modelB = modelB;
+
+    // Create persistent agents with their own sessions
+    this.agentA = new ClaudeAgent(this._nameA, personaA, modelA, this._nameB, seekConsensus);
+    this.agentB = new ClaudeAgent(this._nameB, personaB, modelB, this._nameA, seekConsensus);
+
     this.abortController = new AbortController();
     const myLoopId = ++this.loopId;
 
     this.emitStateChange();
-    this.runLoop(myLoopId, modelA, modelB).catch(err => {
+    this.runLoop(myLoopId).catch(err => {
       if (err.message !== 'Aborted') {
         this.emit('error', err.message);
       }
@@ -82,8 +95,8 @@ export class DebateManager extends EventEmitter {
       this.abortController = new AbortController();
       const myLoopId = ++this.loopId;
       this.emitStateChange();
-      // Models are passed from the original start - we store them
-      this.runLoop(myLoopId, this._modelA, this._modelB).catch(err => {
+      // Agents persist across pause/resume — sessions are maintained
+      this.runLoop(myLoopId).catch(err => {
         if (err.message !== 'Aborted') {
           this.emit('error', err.message);
         }
@@ -96,23 +109,19 @@ export class DebateManager extends EventEmitter {
     this.loopId++;
     this.abortController?.abort();
     this.abortController = null;
+    // Agents are discarded — sessions end naturally
+    this.agentA = null;
+    this.agentB = null;
     this.emitStateChange();
   }
 
-  private _modelA: ModelAlias = 'sonnet';
-  private _modelB: ModelAlias = 'sonnet';
-
-  private async runLoop(id: number, modelA: ModelAlias, modelB: ModelAlias): Promise<void> {
-    this._modelA = modelA;
-    this._modelB = modelB;
+  private async runLoop(id: number): Promise<void> {
     const MAX_RETRIES = 2;
 
     while (id === this.loopId && this.state.status === 'running') {
       const isA = this.state.currentTurn === 'A';
-      const currentAgent = isA
-        ? new ClaudeAgent(this._nameA, this.state.personaA, modelA, this._nameB, this._seekConsensus)
-        : new ClaudeAgent(this._nameB, this.state.personaB, modelB, this._nameA, this._seekConsensus);
-      const currentPersona = this.state.currentTurn === 'A' ? this.state.personaA : this.state.personaB;
+      const currentAgent = isA ? this.agentA! : this.agentB!;
+      const currentPersona = isA ? this.state.personaA : this.state.personaB;
 
       this.emit('thinking', this.state.currentTurn);
 
