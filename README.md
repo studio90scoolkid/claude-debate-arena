@@ -88,7 +88,7 @@ This means debates stay coherent and on-topic even after 10+ exchanges.
 
 | Requirement | Details |
 |-------------|---------|
-| **Claude CLI** | [Install guide](https://docs.anthropic.com/en/docs/claude-cli) — must be authenticated |
+| **Claude CLI** | **1.0.0 or later** — [Install guide](https://docs.anthropic.com/en/docs/claude-cli). Must be authenticated (`claude login`). Older versions may not support session management or `auth status`. |
 | **VS Code** | 1.85.0 or later |
 | **Anthropic API** | Active API access via Claude CLI |
 

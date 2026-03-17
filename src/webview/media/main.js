@@ -38,6 +38,8 @@
       charMaskDude: 'Mask Dude', charNinjaFrog: 'Ninja Frog', charPinkMan: 'Pink Man', charVirtualGuy: 'Virtual Guy',
       seekConsensus: 'Seek Consensus',
       consensusReached: 'CONSENSUS REACHED — Both agents have found common ground.',
+      moderatorSummary: 'MODERATOR SUMMARY',
+      summaryLoading: 'The moderator is preparing a summary...',
     },
     ko: {
       checking: '확인 중...',
@@ -70,6 +72,8 @@
       charMaskDude: '마스크 듀드', charNinjaFrog: '닌자 프로그', charPinkMan: '핑크맨', charVirtualGuy: '버추얼 가이',
       seekConsensus: '합의점 찾기',
       consensusReached: '합의 도달 — 양측이 공통점을 찾았습니다.',
+      moderatorSummary: '사회자 정리',
+      summaryLoading: '사회자가 토론을 정리하고 있습니다...',
     },
     ja: {
       checking: '確認中...',
@@ -1172,6 +1176,28 @@
         consensusDiv.className = 'chat-message consensus-banner';
         consensusDiv.innerHTML = `<div class="consensus-text">${t('consensusReached')}</div>`;
         chatArea.appendChild(consensusDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+        break;
+      }
+      case 'summaryLoading': {
+        // Remove existing loading indicator if any
+        const existing = document.querySelector('.summary-loading');
+        if (existing) existing.remove();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'chat-message summary-loading';
+        loadingDiv.innerHTML = `<div class="summary-loading-text">${t('summaryLoading')}</div>`;
+        chatArea.appendChild(loadingDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+        break;
+      }
+      case 'summary': {
+        // Remove loading indicator
+        const loadingEl = document.querySelector('.summary-loading');
+        if (loadingEl) loadingEl.remove();
+        const summaryDiv = document.createElement('div');
+        summaryDiv.className = 'chat-message summary-banner';
+        summaryDiv.innerHTML = `<div class="summary-header">${t('moderatorSummary')}</div><div class="summary-content">${msg.payload}</div>`;
+        chatArea.appendChild(summaryDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
         break;
       }

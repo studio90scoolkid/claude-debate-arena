@@ -49,7 +49,7 @@ export interface AuthStatus {
 }
 
 export interface ExtensionMessage {
-  type: 'newMessage' | 'stateChange' | 'error' | 'thinking' | 'connectionStatus' | 'usageUpdate' | 'loadSettings';
+  type: 'newMessage' | 'stateChange' | 'error' | 'thinking' | 'connectionStatus' | 'usageUpdate' | 'loadSettings' | 'summary' | 'summaryLoading';
   payload: unknown;
 }
 

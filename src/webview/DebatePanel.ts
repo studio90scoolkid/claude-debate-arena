@@ -75,6 +75,18 @@ export class DebatePanel {
       }
     });
 
+    this.debateManager.on('summaryLoading', () => {
+      if (!this.disposed) {
+        this.panel.webview.postMessage({ type: 'summaryLoading', payload: null });
+      }
+    });
+
+    this.debateManager.on('summary', (text: string) => {
+      if (!this.disposed) {
+        this.panel.webview.postMessage({ type: 'summary', payload: text });
+      }
+    });
+
     // Auto-check connection when panel opens
     this.checkConnection();
 

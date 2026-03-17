@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
-import { ClaudeAgent } from './ClaudeAgent';
+import { spawn } from 'child_process';
+import { ClaudeAgent, findClaudePath, makeCleanEnv } from './ClaudeAgent';
 import { DebateMessage, DebateState, ModelAlias, Persona, TokenUsage } from './types';
 
 const MAX_MESSAGES = 200;
@@ -105,6 +106,7 @@ export class DebateManager extends EventEmitter {
   }
 
   async stop(): Promise<void> {
+    const hadMessages = this.state.messages.length > 0;
     this.state.status = 'stopped';
     this.loopId++;
     this.abortController?.abort();
@@ -113,6 +115,9 @@ export class DebateManager extends EventEmitter {
     this.agentA = null;
     this.agentB = null;
     this.emitStateChange();
+    if (hadMessages) {
+      this.generateSummary();
+    }
   }
 
   private async runLoop(id: number): Promise<void> {
@@ -175,6 +180,7 @@ export class DebateManager extends EventEmitter {
         this.state.status = 'stopped';
         this.emit('consensus');
         this.emitStateChange();
+        this.generateSummary();
         return;
       }
 
@@ -186,5 +192,72 @@ export class DebateManager extends EventEmitter {
 
   private emitStateChange(): void {
     this.emit('stateChange', this.state.status);
+  }
+
+  private generateSummary(): void {
+    const messages = this.state.messages;
+    if (messages.length === 0) { return; }
+
+    const topic = this.state.topic;
+    const nameA = this._nameA;
+    const nameB = this._nameB;
+
+    // Build debate transcript for the summary prompt
+    const transcript = messages.map(m => {
+      const name = m.agent === 'A' ? nameA : nameB;
+      return `[${name}]: ${m.content}`;
+    }).join('\n\n');
+
+    const prompt = `You are a debate moderator/host. The following is a transcript of a debate between "${nameA}" and "${nameB}" on the topic: "${topic}".
+
+Please provide a concise moderator's summary that includes:
+1. The main arguments each side presented
+2. Key points of agreement or disagreement
+3. Which arguments were strongest
+4. A brief closing remark as a moderator
+
+IMPORTANT: Respond in the SAME LANGUAGE as the debate topic "${topic}". Detect the language and use it.
+Keep the summary to 5-8 sentences. Use plain text only, no markdown formatting.
+
+--- DEBATE TRANSCRIPT ---
+${transcript}
+--- END TRANSCRIPT ---`;
+
+    this.emit('summaryLoading');
+
+    const claudePath = findClaudePath();
+    const env = makeCleanEnv();
+    const args = ['-p', prompt, '--output-format', 'json', '--model', 'haiku'];
+
+    const proc = spawn(claudePath, args, {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env,
+    });
+
+    let stdout = '';
+    proc.stdout.on('data', (data: Buffer) => { stdout += data.toString(); });
+    proc.stderr.on('data', () => { /* ignore */ });
+
+    const timeout = setTimeout(() => {
+      try { proc.kill('SIGTERM'); } catch { /* */ }
+    }, 30_000);
+
+    proc.on('close', (code) => {
+      clearTimeout(timeout);
+      if (code !== 0) { return; }
+      try {
+        const parsed = JSON.parse(stdout);
+        const result = parsed.result || parsed.content || stdout;
+        const text = typeof result === 'string' ? result.trim() : JSON.stringify(result);
+        if (text) {
+          this.emit('summary', text);
+        }
+      } catch {
+        const text = stdout.trim();
+        if (text) {
+          this.emit('summary', text);
+        }
+      }
+    });
   }
 }

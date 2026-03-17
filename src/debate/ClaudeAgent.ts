@@ -17,7 +17,7 @@ function getLog(): vscode.OutputChannel {
 
 let resolvedClaudePath: string | null = null;
 
-function makeCleanEnv(): NodeJS.ProcessEnv {
+export function makeCleanEnv(): NodeJS.ProcessEnv {
   const env = { ...process.env };
   delete env.CLAUDECODE;
   delete env.CLAUDE_CODE_SESSION_ID;
@@ -26,7 +26,7 @@ function makeCleanEnv(): NodeJS.ProcessEnv {
   return env;
 }
 
-function findClaudePath(): string {
+export function findClaudePath(): string {
   if (resolvedClaudePath) { return resolvedClaudePath; }
 
   const candidates = [
