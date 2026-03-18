@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { DebateManager } from '../debate/DebateManager';
 import { checkClaudeAuth } from '../debate/ClaudeAgent';
-import { DebateMessage, ModelAlias, Persona, WebviewMessage } from '../debate/types';
+import { checkGeminiAuth } from '../debate/GeminiAgent';
+import { DebateMessage, ModelAlias, Persona, Provider, WebviewMessage } from '../debate/types';
 import { getWebviewContent } from './getWebviewContent';
 
 const SETTINGS_KEY = 'debate.lastSettings';
@@ -130,17 +131,24 @@ export class DebatePanel {
       payload: { status: 'checking' },
     });
 
-    const auth = await checkClaudeAuth();
+    const [claudeAuth, geminiAuth] = await Promise.all([
+      checkClaudeAuth(),
+      checkGeminiAuth(),
+    ]);
 
     if (this.disposed) { return; }
     this.panel.webview.postMessage({
       type: 'connectionStatus',
       payload: {
-        status: auth.loggedIn ? 'connected' : 'disconnected',
-        email: auth.email,
-        orgName: auth.orgName,
-        subscriptionType: auth.subscriptionType,
-        error: auth.error,
+        status: (claudeAuth.loggedIn || geminiAuth.loggedIn) ? 'connected' : 'disconnected',
+        claudeAvailable: claudeAuth.loggedIn,
+        claudeEmail: claudeAuth.email,
+        claudeSubscription: claudeAuth.subscriptionType,
+        claudeError: claudeAuth.error,
+        geminiAvailable: geminiAuth.loggedIn,
+        geminiInstalled: !!geminiAuth.installed,
+        geminiEmail: geminiAuth.email,
+        geminiError: geminiAuth.error,
       },
     });
   }
@@ -158,6 +166,8 @@ export class DebatePanel {
             message.nameA || 'Agent A',
             message.nameB || 'Agent B',
             message.seekConsensus || false,
+            (message.providerA as Provider) || 'claude',
+            (message.providerB as Provider) || 'claude',
           );
         }
         break;

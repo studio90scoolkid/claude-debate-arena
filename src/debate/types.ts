@@ -1,5 +1,18 @@
 export type Persona = 'pro' | 'neutral' | 'con';
 
+/** Common interface for all AI agent implementations */
+export interface AIAgent {
+  readonly name: string;
+  readonly persona: Persona;
+  readonly model: ModelAlias;
+  readonly opponentName: string;
+  respond(
+    topic: string,
+    history: DebateMessage[],
+    signal?: AbortSignal,
+  ): Promise<{ text: string; usage?: TokenUsage }>;
+}
+
 export interface TokenUsage {
   inputTokens: number;
   outputTokens: number;
@@ -24,13 +37,19 @@ export interface DebateState {
   personaB: Persona;
 }
 
-export type ModelAlias = 'haiku' | 'sonnet' | 'opus';
+export type Provider = 'claude' | 'gemini';
+
+export type ClaudeModelAlias = 'haiku' | 'sonnet' | 'opus';
+export type GeminiModelAlias = 'gemini-2.5-flash' | 'gemini-2.5-pro';
+export type ModelAlias = ClaudeModelAlias | GeminiModelAlias;
 
 export interface WebviewMessage {
   type: 'startDebate' | 'stopDebate' | 'pauseDebate' | 'resumeDebate' | 'checkConnection' | 'saveSettings';
   topic?: string;
   personaA?: Persona;
   personaB?: Persona;
+  providerA?: Provider;
+  providerB?: Provider;
   modelA?: ModelAlias;
   modelB?: ModelAlias;
   nameA?: string;
@@ -53,10 +72,20 @@ export interface ExtensionMessage {
   payload: unknown;
 }
 
-export const MODEL_LABELS: Record<ModelAlias, string> = {
+export const CLAUDE_MODEL_LABELS: Record<ClaudeModelAlias, string> = {
   haiku: 'Haiku (Fast)',
   sonnet: 'Sonnet (Balanced)',
   opus: 'Opus (Powerful)',
+};
+
+export const GEMINI_MODEL_LABELS: Record<GeminiModelAlias, string> = {
+  'gemini-2.5-flash': 'Gemini 2.5 Flash',
+  'gemini-2.5-pro': 'Gemini 2.5 Pro',
+};
+
+export const MODEL_LABELS: Record<ModelAlias, string> = {
+  ...CLAUDE_MODEL_LABELS,
+  ...GEMINI_MODEL_LABELS,
 };
 
 export const PERSONA_LABELS: Record<Persona, string> = {

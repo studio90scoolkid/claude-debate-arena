@@ -134,6 +134,7 @@ html[data-lang="fa"] .btn-group {
 .conn-dot.checking { background: var(--accent-yellow); }
 .conn-dot.connected { background: var(--accent-green); animation: none; }
 .conn-dot.disconnected { background: var(--accent-red); animation: connBlink 1s infinite; }
+.conn-dot.warning { background: var(--accent-yellow); animation: none; }
 
 @keyframes connPulse {
   0%, 100% { opacity: 0.4; }
@@ -145,14 +146,42 @@ html[data-lang="fa"] .btn-group {
   50% { opacity: 0.3; }
 }
 
-.conn-text {
+.conn-provider {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.conn-label {
   font-size: 10px;
   color: var(--text-secondary);
   letter-spacing: 1px;
 }
 
-.conn-text.connected { color: var(--accent-green); }
-.conn-text.disconnected { color: var(--accent-red); }
+.conn-label.connected { color: var(--accent-green); }
+.conn-label.disconnected { color: var(--accent-red); }
+.conn-label.checking { color: var(--accent-yellow); }
+.conn-label.warning { color: var(--accent-yellow); }
+
+.conn-account {
+  font-size: 9px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conn-account:empty {
+  display: none;
+}
+
+.conn-divider {
+  color: #4a4a6a;
+  font-size: 10px;
+  margin: 0 2px;
+}
 
 .conn-refresh {
   background: none;

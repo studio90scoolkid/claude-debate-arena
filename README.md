@@ -23,7 +23,7 @@
 
 ## What is this?
 
-**Claude Talk** pits two Claude-powered AI agents against each other to debate any topic you choose. Each agent takes a stance (Pro, Neutral, or Con) and argues its position in real-time.
+**Claude Talk** pits two AI agents against each other to debate any topic you choose. Supports both **Claude** and **Google Gemini** — mix and match providers per agent. Each agent takes a stance (Pro, Neutral, or Con) and argues its position in real-time.
 
 > Pick a topic. Choose your fighters. Hit START. Grab some popcorn.
 
@@ -43,12 +43,14 @@ Two AI agents debating from different perspectives can do more than entertain:
 
 | Feature | Description |
 |---------|-------------|
-| **Real-time AI Debate** | Two Claude agents argue back and forth automatically |
+| **Multi-Provider Support** | Use **Claude** and **Google Gemini** — mix providers per agent (e.g., Claude vs Gemini) |
+| **Real-time AI Debate** | Two AI agents argue back and forth automatically |
 | **Seek Consensus Mode** | Agents gradually find common ground instead of arguing forever |
 | **3 Stance Modes** | Set each agent as **Pro**, **Neutral**, or **Con** |
-| **Model Selection** | Mix and match **Haiku**, **Sonnet**, or **Opus** per agent |
+| **Model Selection** | Claude: **Haiku / Sonnet / Opus** — Gemini: **2.5 Flash / 2.5 Pro** |
+| **Per-Provider Status** | Separate connection indicators for each provider with 3-state display (connected / not authenticated / not installed) |
 | **Custom Agent Names** | Name your debaters anything you want |
-| **Persistent Sessions** | Each agent maintains its own Claude CLI session with full context retention |
+| **Persistent Sessions** | Each agent maintains its own CLI session with full context retention |
 | **30+ Languages** | Full UI localization — Korean, Japanese, Chinese, Spanish, French, and more |
 | **Auto-save Settings** | Your last configuration is restored automatically |
 | **Debate Controls** | Pause, resume, or stop debates at any time |
@@ -58,9 +60,10 @@ Two AI agents debating from different perspectives can do more than entertain:
 ## Quick Start
 
 1. Install [Claude CLI](https://docs.anthropic.com/en/docs/claude-cli) and authenticate (`claude login`)
-2. Install this extension from the VS Code Marketplace
-3. Open Command Palette → **Claude Talk: Start**
-4. Enter a topic, pick characters & stances, and hit **START**
+2. *(Optional)* Install [Gemini CLI](https://github.com/google-gemini/gemini-cli) (`npm install -g @google/gemini-cli`) and authenticate (`gemini`)
+3. Install this extension from the VS Code Marketplace
+4. Open Command Palette → **Claude Talk: Start**
+5. Enter a topic, pick characters & stances, and hit **START**
 
 ---
 
@@ -69,13 +72,13 @@ Two AI agents debating from different perspectives can do more than entertain:
 ```
 ┌─────────────┐     debate topic      ┌─────────────┐
 │   Agent A    │ ◄──────────────────► │   Agent B    │
-│  (Claude)    │   turn-by-turn       │  (Claude)    │
-│  Pro/Con     │   via Claude CLI     │  Pro/Con     │
+│ Claude/Gemini│   turn-by-turn       │ Claude/Gemini│
+│  Pro/Con     │   via CLI sessions   │  Pro/Con     │
 └─────────────┘                       └─────────────┘
 ```
 
-Each agent maintains its own **persistent Claude CLI session** throughout the debate. This means:
-- **Full context retention** — Claude natively remembers the entire debate history per agent
+Each agent maintains its own **persistent CLI session** throughout the debate. This means:
+- **Full context retention** — each CLI natively remembers the entire debate history per agent
 - **Language-neutral prompts** — agents automatically respond in the same language as your topic
 - **Turn-aware strategy hints** — arguments evolve over time with new angles each turn
 - **Lower token usage** — no need to resend history every turn
@@ -88,9 +91,9 @@ This means debates stay coherent and on-topic even after 10+ exchanges.
 
 | Requirement | Details |
 |-------------|---------|
-| **Claude CLI** | **1.0.0 or later** — [Install guide](https://docs.anthropic.com/en/docs/claude-cli). Must be authenticated (`claude login`). Older versions may not support session management or `auth status`. |
+| **Claude CLI** | **1.0.0 or later** — [Install guide](https://docs.anthropic.com/en/docs/claude-cli). Must be authenticated (`claude login`). |
+| **Gemini CLI** *(optional)* | [Install guide](https://github.com/google-gemini/gemini-cli). `npm install -g @google/gemini-cli`, then authenticate (`gemini`). |
 | **VS Code** | 1.85.0 or later |
-| **Anthropic API** | Active API access via Claude CLI |
 
 ---
 
@@ -111,6 +114,7 @@ English, 한국어, 日本語, 中文, Español, Français, Deutsch, Português,
 
 ## Tips
 
+- **Mix providers** — pit Claude Opus against Gemini 2.5 Pro for cross-model debates
 - **Use different models** for each agent (e.g., Opus vs Haiku) to see how reasoning depth affects arguments
 - **Try unusual topics** — philosophical dilemmas, code architecture debates, or pop culture hot takes work great
 - **Switch stances mid-config** — set both agents to "Pro" for an agreement spiral, or both to "Con" for mutual destruction

@@ -66,8 +66,17 @@ export function getWebviewContent(
       <div class="subtitle">STUDIO COOLKID</div>
     </div>
     <div class="connection-status" id="connectionStatus">
-      <span class="conn-dot" id="connDot"></span>
-      <span class="conn-text" id="connText" data-i18n="checking"></span>
+      <span class="conn-provider">
+        <span class="conn-dot" id="connDotClaude"></span>
+        <span class="conn-label" id="connLabelClaude">Claude</span>
+        <span class="conn-account" id="connAccountClaude"></span>
+      </span>
+      <span class="conn-divider">|</span>
+      <span class="conn-provider">
+        <span class="conn-dot" id="connDotGemini"></span>
+        <span class="conn-label" id="connLabelGemini">Gemini</span>
+        <span class="conn-account" id="connAccountGemini"></span>
+      </span>
       <button class="conn-refresh" id="connRefresh" title="Refresh">&#x21bb;</button>
     </div>
   </div>
@@ -101,6 +110,13 @@ export function getWebviewContent(
             </select>
           </div>
           <div class="persona-group">
+            <label data-i18n="provider"></label>
+            <select id="providerA" class="persona-select provider-select">
+              <option value="claude" selected>Claude</option>
+              <option value="gemini">Gemini</option>
+            </select>
+          </div>
+          <div class="persona-group">
             <label data-i18n="model"></label>
             <select id="modelA" class="persona-select model-select">
               <option value="haiku" data-i18n="modelHaiku"></option>
@@ -131,6 +147,13 @@ export function getWebviewContent(
                 <option value="ninja-frog" selected data-i18n="charNinjaFrog"></option>
                 <option value="pink-man" data-i18n="charPinkMan"></option>
                 <option value="virtual-guy" data-i18n="charVirtualGuy"></option>
+            </select>
+          </div>
+          <div class="persona-group">
+            <label data-i18n="provider"></label>
+            <select id="providerB" class="persona-select provider-select">
+              <option value="claude" selected>Claude</option>
+              <option value="gemini">Gemini</option>
             </select>
           </div>
           <div class="persona-group">

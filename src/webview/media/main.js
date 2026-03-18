@@ -18,9 +18,12 @@
       pro: 'Pro (FOR)',
       neutral: 'Neutral',
       con: 'Con (AGAINST)',
+      provider: 'PROVIDER:',
       modelHaiku: 'Haiku (Fast)',
       modelSonnet: 'Sonnet (Balanced)',
       modelOpus: 'Opus (Powerful)',
+      modelGeminiFlash: 'Gemini 2.5 Flash',
+      modelGeminiPro: 'Gemini 2.5 Pro',
       startBattle: 'START BATTLE',
       pause: 'PAUSE',
       resume: 'RESUME',
@@ -52,9 +55,12 @@
       pro: '찬성 (PRO)',
       neutral: '중립 (NEUTRAL)',
       con: '반대 (CON)',
+      provider: '제공자:',
       modelHaiku: 'Haiku (빠름)',
       modelSonnet: 'Sonnet (균형)',
       modelOpus: 'Opus (강력)',
+      modelGeminiFlash: 'Gemini 2.5 Flash',
+      modelGeminiPro: 'Gemini 2.5 Pro',
       startBattle: '토론 시작',
       pause: '일시정지',
       resume: '재개',
@@ -658,6 +664,10 @@
   /** @type {HTMLSelectElement} */
   const personaBSelect = document.getElementById('personaB');
   /** @type {HTMLSelectElement} */
+  const providerASelect = document.getElementById('providerA');
+  /** @type {HTMLSelectElement} */
+  const providerBSelect = document.getElementById('providerB');
+  /** @type {HTMLSelectElement} */
   const modelASelect = document.getElementById('modelA');
   /** @type {HTMLSelectElement} */
   const modelBSelect = document.getElementById('modelB');
@@ -684,9 +694,17 @@
   /** @type {HTMLElement} */
   const msgCount = document.getElementById('msgCount');
   /** @type {HTMLElement} */
-  const connDot = document.getElementById('connDot');
+  const connDotClaude = document.getElementById('connDotClaude');
   /** @type {HTMLElement} */
-  const connText = document.getElementById('connText');
+  const connLabelClaude = document.getElementById('connLabelClaude');
+  /** @type {HTMLElement} */
+  const connAccountClaude = document.getElementById('connAccountClaude');
+  /** @type {HTMLElement} */
+  const connDotGemini = document.getElementById('connDotGemini');
+  /** @type {HTMLElement} */
+  const connLabelGemini = document.getElementById('connLabelGemini');
+  /** @type {HTMLElement} */
+  const connAccountGemini = document.getElementById('connAccountGemini');
   /** @type {HTMLButtonElement} */
   const connRefresh = document.getElementById('connRefresh');
   /** @type {HTMLElement} */
@@ -696,10 +714,75 @@
   const tokenInfo = document.getElementById('tokenInfo');
 
   let isConnected = false;
+  let claudeAvailable = false;
+  let geminiAvailable = false;
   let messageCount = 0;
   let currentStatus = 'idle';
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
+
+  // ===== Provider-dependent Model Lists =====
+  const CLAUDE_MODELS = [
+    { value: 'haiku', i18n: 'modelHaiku' },
+    { value: 'sonnet', i18n: 'modelSonnet' },
+    { value: 'opus', i18n: 'modelOpus' },
+  ];
+  const GEMINI_MODELS = [
+    { value: 'gemini-2.5-flash', i18n: 'modelGeminiFlash' },
+    { value: 'gemini-2.5-pro', i18n: 'modelGeminiPro' },
+  ];
+
+  function updateModelOptions(providerSelect, modelSelect) {
+    const provider = providerSelect.value;
+    const models = provider === 'gemini' ? GEMINI_MODELS : CLAUDE_MODELS;
+    const prevValue = modelSelect.value;
+    modelSelect.innerHTML = '';
+    models.forEach((m, i) => {
+      const opt = document.createElement('option');
+      opt.value = m.value;
+      opt.textContent = t(m.i18n);
+      if (i === (models.length > 2 ? 1 : 0)) opt.selected = true; // default: sonnet / flash
+      modelSelect.appendChild(opt);
+    });
+    // Restore previous value if still valid
+    const validValues = models.map(m => m.value);
+    if (validValues.includes(prevValue)) {
+      modelSelect.value = prevValue;
+    }
+  }
+
+  providerASelect.addEventListener('change', () => updateModelOptions(providerASelect, modelASelect));
+  providerBSelect.addEventListener('change', () => updateModelOptions(providerBSelect, modelBSelect));
+
+  /** Update the two provider connection indicators */
+  function setProviderStatus(provider, status) {
+    const dot = provider === 'claude' ? connDotClaude : connDotGemini;
+    const label = provider === 'claude' ? connLabelClaude : connLabelGemini;
+    dot.className = 'conn-dot ' + status;
+    label.className = 'conn-label ' + status;
+  }
+
+  function setAccountInfo(el, text) {
+    el.textContent = text;
+  }
+
+  /** Disable provider options that are not available */
+  function updateProviderOptions() {
+    [providerASelect, providerBSelect].forEach(sel => {
+      for (const opt of sel.options) {
+        if (opt.value === 'claude') opt.disabled = !claudeAvailable;
+        if (opt.value === 'gemini') opt.disabled = !geminiAvailable;
+      }
+      // If current selection is unavailable, switch to the other
+      if (sel.value === 'claude' && !claudeAvailable && geminiAvailable) {
+        sel.value = 'gemini';
+        updateModelOptions(sel, sel === providerASelect ? modelASelect : modelBSelect);
+      } else if (sel.value === 'gemini' && !geminiAvailable && claudeAvailable) {
+        sel.value = 'claude';
+        updateModelOptions(sel, sel === providerASelect ? modelASelect : modelBSelect);
+      }
+    });
+  }
 
   // ===== Pixel Adventure 1 Sprite System =====
   // Sprite data injected from extension as base64 data URIs
@@ -1006,12 +1089,19 @@
     const statusMap = { idle: 'ready', running: 'battle', paused: 'paused', stopped: 'stopped' };
     statusText.textContent = t(statusMap[status] || 'ready');
 
+    // Clear model info when debate stops
+    if (status === 'idle' || status === 'stopped') {
+      connInfo.textContent = '';
+    }
+
     startBtn.disabled = status === 'running';
     pauseBtn.disabled = status !== 'running' && status !== 'paused';
     stopBtn.disabled = status === 'idle' || status === 'stopped';
     topicInput.disabled = status === 'running';
     personaASelect.disabled = status === 'running';
     personaBSelect.disabled = status === 'running';
+    providerASelect.disabled = status === 'running';
+    providerBSelect.disabled = status === 'running';
     modelASelect.disabled = status === 'running';
     modelBSelect.disabled = status === 'running';
     if (charASelect) charASelect.disabled = status === 'running';
@@ -1037,6 +1127,8 @@
         personaB: personaBSelect.value,
         charA: charASelect.value,
         charB: charBSelect.value,
+        providerA: providerASelect.value,
+        providerB: providerBSelect.value,
         modelA: modelASelect.value,
         modelB: modelBSelect.value,
         topic: topicInput.value,
@@ -1052,6 +1144,8 @@
     if (s.personaB) personaBSelect.value = s.personaB;
     if (s.charA) { charASelect.value = s.charA; selectedCharA = s.charA; }
     if (s.charB) { charBSelect.value = s.charB; selectedCharB = s.charB; }
+    if (s.providerA) { providerASelect.value = s.providerA; updateModelOptions(providerASelect, modelASelect); }
+    if (s.providerB) { providerBSelect.value = s.providerB; updateModelOptions(providerBSelect, modelBSelect); }
     if (s.modelA) modelASelect.value = s.modelA;
     if (s.modelB) modelBSelect.value = s.modelB;
     if (s.topic) topicInput.value = s.topic;
@@ -1061,9 +1155,26 @@
   // ===== Event Handlers =====
   startBtn.addEventListener('click', () => {
     if (!isConnected) {
-      connText.textContent = t('notConnected');
-      connText.className = 'conn-text disconnected';
-      connDot.className = 'conn-dot disconnected';
+      connInfo.textContent = t('notConnected');
+      return;
+    }
+    // Validate selected providers are available
+    const selA = providerASelect.value;
+    const selB = providerBSelect.value;
+    if (selA === 'claude' && !claudeAvailable) {
+      connInfo.textContent = 'Claude CLI ' + t('disconnected');
+      return;
+    }
+    if (selA === 'gemini' && !geminiAvailable) {
+      connInfo.textContent = 'Gemini CLI ' + t('disconnected');
+      return;
+    }
+    if (selB === 'claude' && !claudeAvailable) {
+      connInfo.textContent = 'Claude CLI ' + t('disconnected');
+      return;
+    }
+    if (selB === 'gemini' && !geminiAvailable) {
+      connInfo.textContent = 'Gemini CLI ' + t('disconnected');
       return;
     }
 
@@ -1084,23 +1195,32 @@
 
     saveSettings();
 
+    // Show agent model info in bottom status bar
+    const modelLabelA = modelASelect.options[modelASelect.selectedIndex].textContent;
+    const modelLabelB = modelBSelect.options[modelBSelect.selectedIndex].textContent;
+    const nameA = nameAInput.value || 'Agent A';
+    const nameB = nameBInput.value || 'Agent B';
+    connInfo.textContent = `${nameA}: ${modelLabelA}  vs  ${nameB}: ${modelLabelB}`;
+
     vscode.postMessage({
       type: 'startDebate',
       topic: topic,
       personaA: personaASelect.value,
       personaB: personaBSelect.value,
+      providerA: providerASelect.value,
+      providerB: providerBSelect.value,
       modelA: modelASelect.value,
       modelB: modelBSelect.value,
-      nameA: nameAInput.value || 'Agent A',
-      nameB: nameBInput.value || 'Agent B',
+      nameA: nameA,
+      nameB: nameB,
       seekConsensus: seekConsensusCheck.checked,
     });
   });
 
   connRefresh.addEventListener('click', () => {
-    connDot.className = 'conn-dot checking';
-    connText.textContent = t('checking');
-    connText.className = 'conn-text';
+    setProviderStatus('claude', 'checking');
+    setProviderStatus('gemini', 'checking');
+    connInfo.textContent = '';
     vscode.postMessage({ type: 'checkConnection' });
   });
 
@@ -1146,25 +1266,49 @@
       case 'connectionStatus': {
         const conn = msg.payload;
         if (conn.status === 'checking') {
-          connDot.className = 'conn-dot checking';
-          connText.textContent = t('checking');
-          connText.className = 'conn-text';
+          setProviderStatus('claude', 'checking');
+          setProviderStatus('gemini', 'checking');
+          setAccountInfo(connAccountClaude, '');
+          setAccountInfo(connAccountGemini, '');
           isConnected = false;
+          connInfo.textContent = '';
         } else if (conn.status === 'connected') {
-          connDot.className = 'conn-dot connected';
-          connText.textContent = t('connected');
-          connText.className = 'conn-text connected';
-          isConnected = true;
-          const infoparts = [];
-          if (conn.email) infoparts.push(conn.email);
-          if (conn.subscriptionType) infoparts.push(conn.subscriptionType.toUpperCase());
-          connInfo.textContent = infoparts.join(' | ');
+          claudeAvailable = !!conn.claudeAvailable;
+          geminiAvailable = !!conn.geminiAvailable;
+          isConnected = claudeAvailable || geminiAvailable;
+          setProviderStatus('claude', claudeAvailable ? 'connected' : 'disconnected');
+          // Gemini: 3 states - connected (green), installed but not authed (yellow), not installed (red)
+          const geminiStatus = geminiAvailable ? 'connected' : (conn.geminiInstalled ? 'warning' : 'disconnected');
+          setProviderStatus('gemini', geminiStatus);
+          // Show account info next to each provider in top bar
+          if (claudeAvailable) {
+            const parts = [];
+            if (conn.claudeEmail) parts.push(conn.claudeEmail);
+            if (conn.claudeSubscription) parts.push(conn.claudeSubscription.toUpperCase());
+            setAccountInfo(connAccountClaude, parts.length ? parts.join(' · ') : '');
+          } else {
+            setAccountInfo(connAccountClaude, '');
+          }
+          setAccountInfo(connAccountGemini, geminiAvailable && conn.geminiEmail ? conn.geminiEmail : '');
+          // Show errors in bottom status bar
+          const errors = [];
+          if (!claudeAvailable && conn.claudeError) errors.push(conn.claudeError);
+          if (!geminiAvailable && conn.geminiError) errors.push(conn.geminiError);
+          connInfo.textContent = errors.join(' | ');
+          updateProviderOptions();
         } else {
-          connDot.className = 'conn-dot disconnected';
-          connText.textContent = t('disconnected');
-          connText.className = 'conn-text disconnected';
+          setProviderStatus('claude', 'disconnected');
+          setProviderStatus('gemini', 'disconnected');
           isConnected = false;
-          connInfo.textContent = conn.error || '';
+          claudeAvailable = false;
+          geminiAvailable = false;
+          setAccountInfo(connAccountClaude, '');
+          setAccountInfo(connAccountGemini, '');
+          const errors = [];
+          if (conn.claudeError) errors.push(conn.claudeError);
+          if (conn.geminiError) errors.push(conn.geminiError);
+          connInfo.textContent = errors.join(' | ') || '';
+          updateProviderOptions();
         }
         break;
       }

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2026-03-18
+
+### Added
+- Google Gemini support — use Gemini 2.5 Flash or Gemini 2.5 Pro as debate agents via Gemini CLI
+- Mix-and-match providers per agent (e.g., Claude Sonnet vs Gemini 2.5 Pro)
+- Per-provider connection status indicators with 3-state display (green: connected, yellow: installed but not authenticated, red: not installed)
+- Per-provider account info in top status bar (Claude email/subscription, Gemini email from OAuth)
+- Gemini authentication check via local config files (`~/.gemini/settings.json`, `oauth_creds.json`) — zero token cost
+- Bottom status bar shows agent model matchup during debate (e.g., "Agent A: Sonnet vs Agent B: Gemini 2.5 Pro")
+
 ## [0.3.0] - 2026-03-17
 
 ### Added

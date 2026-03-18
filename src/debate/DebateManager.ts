@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events';
 import { spawn } from 'child_process';
 import { ClaudeAgent, findClaudePath, makeCleanEnv } from './ClaudeAgent';
-import { DebateMessage, DebateState, ModelAlias, Persona, TokenUsage } from './types';
+import { GeminiAgent, findGeminiPath } from './GeminiAgent';
+import { AIAgent, DebateMessage, DebateState, ModelAlias, Persona, Provider, TokenUsage } from './types';
 
 const MAX_MESSAGES = 200;
 
@@ -26,10 +27,12 @@ export class DebateManager extends EventEmitter {
   private _seekConsensus = false;
   private _modelA: ModelAlias = 'sonnet';
   private _modelB: ModelAlias = 'sonnet';
+  private _providerA: Provider = 'claude';
+  private _providerB: Provider = 'claude';
 
-  // Persistent agents — maintain their own Claude CLI sessions
-  private agentA: ClaudeAgent | null = null;
-  private agentB: ClaudeAgent | null = null;
+  // Persistent agents — maintain their own CLI sessions
+  private agentA: AIAgent | null = null;
+  private agentB: AIAgent | null = null;
 
   getState(): DebateState {
     return { ...this.state, messages: [...this.state.messages] };
@@ -44,6 +47,8 @@ export class DebateManager extends EventEmitter {
     nameA = 'Agent A',
     nameB = 'Agent B',
     seekConsensus = false,
+    providerA: Provider = 'claude',
+    providerB: Provider = 'claude',
   ): Promise<void> {
     // Stop any existing debate
     if (this.state.status === 'running' || this.state.status === 'paused') {
@@ -65,10 +70,12 @@ export class DebateManager extends EventEmitter {
     this._seekConsensus = seekConsensus;
     this._modelA = modelA;
     this._modelB = modelB;
+    this._providerA = providerA;
+    this._providerB = providerB;
 
     // Create persistent agents with their own sessions
-    this.agentA = new ClaudeAgent(this._nameA, personaA, modelA, this._nameB, seekConsensus);
-    this.agentB = new ClaudeAgent(this._nameB, personaB, modelB, this._nameA, seekConsensus);
+    this.agentA = this.createAgent(providerA, this._nameA, personaA, modelA, this._nameB, seekConsensus);
+    this.agentB = this.createAgent(providerB, this._nameB, personaB, modelB, this._nameA, seekConsensus);
 
     this.abortController = new AbortController();
     const myLoopId = ++this.loopId;
@@ -190,6 +197,20 @@ export class DebateManager extends EventEmitter {
     }
   }
 
+  private createAgent(
+    provider: Provider,
+    name: string,
+    persona: Persona,
+    model: ModelAlias,
+    opponentName: string,
+    seekConsensus: boolean,
+  ): AIAgent {
+    if (provider === 'gemini') {
+      return new GeminiAgent(name, persona, model as any, opponentName, seekConsensus);
+    }
+    return new ClaudeAgent(name, persona, model as any, opponentName, seekConsensus);
+  }
+
   private emitStateChange(): void {
     this.emit('stateChange', this.state.status);
   }
@@ -225,11 +246,15 @@ ${transcript}
 
     this.emit('summaryLoading');
 
-    const claudePath = findClaudePath();
-    const env = makeCleanEnv();
-    const args = ['-p', prompt, '--output-format', 'json', '--model', 'haiku'];
+    // Use Claude for summary by default; fall back to Gemini if both agents use Gemini
+    const useGemini = this._providerA === 'gemini' && this._providerB === 'gemini';
+    const cliPath = useGemini ? findGeminiPath() : findClaudePath();
+    const env = useGemini ? { ...process.env, PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin` } : makeCleanEnv();
+    const args = useGemini
+      ? ['-p', prompt, '--output-format', 'json', '-m', 'gemini-2.5-flash']
+      : ['-p', prompt, '--output-format', 'json', '--model', 'haiku'];
 
-    const proc = spawn(claudePath, args, {
+    const proc = spawn(cliPath, args, {
       stdio: ['ignore', 'pipe', 'pipe'],
       env,
     });
@@ -247,7 +272,7 @@ ${transcript}
       if (code !== 0) { return; }
       try {
         const parsed = JSON.parse(stdout);
-        const result = parsed.result || parsed.content || stdout;
+        const result = parsed.result || parsed.response || parsed.content || parsed.text || stdout;
         const text = typeof result === 'string' ? result.trim() : JSON.stringify(result);
         if (text) {
           this.emit('summary', text);
