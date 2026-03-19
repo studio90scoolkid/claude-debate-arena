@@ -45,7 +45,7 @@ Two AI agents debating from different perspectives can do more than entertain:
 |---------|-------------|
 | **Multi-Provider Support** | Use **Claude** and **Google Gemini** — mix providers per agent (e.g., Claude vs Gemini) |
 | **Real-time AI Debate** | Two AI agents argue back and forth automatically |
-| **Seek Consensus Mode** | Agents gradually find common ground instead of arguing forever |
+| **Seek Consensus Mode** | Agents naturally find common ground with a real-time consensus gauge in the status bar |
 | **Moderator Summary** | Optional AI-generated debate summary at the end (toggleable, uses top-tier models) |
 | **3 Stance Modes** | Set each agent as **Pro**, **Neutral**, or **Con** |
 | **Model Selection** | Claude: **Haiku / Sonnet / Opus** — Gemini: **2.5 Flash / 2.5 Pro** |
@@ -82,6 +82,7 @@ Each agent maintains its own **persistent CLI session** throughout the debate. T
 - **Full context retention** — each CLI natively remembers the entire debate history per agent
 - **Language-neutral prompts** — agents automatically respond in the same language as your topic
 - **Turn-aware strategy hints** — arguments evolve over time with new angles each turn
+- **Consensus gauge** — in consensus mode, a live progress bar tracks how close agents are to agreement
 - **Lower token usage** — no need to resend history every turn
 
 This means debates stay coherent and on-topic even after 10+ exchanges.

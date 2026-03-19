@@ -177,8 +177,17 @@ export class ClaudeAgent implements AIAgent {
   private buildSystemPrompt(topic: string): string {
     const personaInstruction = PERSONA_PROMPTS[this.persona];
     const consensusRule = this.seekConsensus
-      ? `\n- This is consensus-seeking mode. Gradually acknowledge valid points from your opponent and find common ground.
-- When consensus is reached, include "[CONSENSUS_REACHED]" at the end of your statement.`
+      ? `\n- This is consensus-seeking mode. You genuinely want to find truth, not just win.
+- Listen carefully to your opponent's arguments. If they make a valid point, acknowledge it honestly.
+- Do NOT rush to agree. Defend your position firmly when you believe you are right.
+- Only shift your stance when genuinely persuaded by evidence or logic, not just to be agreeable.
+- At the end of every response, rate how much you agree with your opponent on a scale of 0-100 using this exact format: [CONSENSUS:XX] (e.g., [CONSENSUS:25])
+  - 0-20: Strongly disagree, fundamental differences remain
+  - 21-40: Some valid points acknowledged, but core disagreement persists
+  - 41-60: Significant common ground found, but key differences remain
+  - 61-80: Mostly aligned, working out remaining details
+  - 81-100: Full agreement reached on core issues
+- When you genuinely believe both sides have reached agreement (score 85+), include "[CONSENSUS_REACHED]" at the end.`
       : '';
 
     return `${personaInstruction}
@@ -196,7 +205,7 @@ Absolute rules:
 - Repeating the same argument in different words is forbidden.
 - You MUST respond in the SAME LANGUAGE as the debate topic. Detect the language of "${topic}" and use that language for your entire response.
 - Keep your response to 3-5 sentences.
-- NEVER use markdown formatting (headings, bold, italic, lists, code blocks, quotes, etc.). Use plain text only.${consensusRule}`;
+- NEVER use markdown formatting. No **, no *, no #, no -, no \`, no >. Absolutely zero markup characters. Plain text only. This is non-negotiable.${consensusRule}`;
   }
 
   /** First turn: introduce position */
@@ -214,8 +223,8 @@ Present your core stance and strongest evidence.`;
 
     const strategyHint = this.getStrategyHint();
 
-    const actionLine = this.seekConsensus && this.turnCount > 2
-      ? `Consider the above statement and respond while seeking common ground.`
+    const actionLine = this.seekConsensus
+      ? `Respond to the above statement honestly. Acknowledge what is valid, challenge what you disagree with.`
       : `Counter the above statement.`;
 
     // Topic anchor gets stronger as turns progress
@@ -234,15 +243,15 @@ Strategy: ${strategyHint}${topicReminder}`;
   private getStrategyHint(): string {
     if (this.seekConsensus) {
       if (this.turnCount <= 1) {
-        return 'Present your core stance and strongest evidence.';
-      } else if (this.turnCount <= 2) {
-        return 'Maintain your position, but acknowledge valid points from your opponent.';
+        return 'Present your core stance and strongest evidence clearly.';
       } else if (this.turnCount <= 3) {
-        return 'Explore common ground between both positions.';
-      } else if (this.turnCount <= 4) {
-        return 'Propose a compromise or integrated solution addressing both sides\' core concerns.';
+        return 'Engage with your opponent\'s specific arguments. Challenge weak points, but honestly acknowledge strong ones.';
+      } else if (this.turnCount <= 5) {
+        return 'Deepen the discussion. Introduce nuance, address edge cases, and refine your position based on the exchange so far.';
+      } else if (this.turnCount <= 8) {
+        return 'Focus on the remaining points of disagreement. If positions are converging, explore why. If not, clarify the core tension.';
       } else {
-        return 'Summarize a final agreement acceptable to both sides. If consensus is reached, include "[CONSENSUS_REACHED]" at the end.';
+        return 'Synthesize the discussion. What has been established? What genuine disagreements remain? Be honest about where you stand now.';
       }
     } else {
       if (this.turnCount <= 1) {

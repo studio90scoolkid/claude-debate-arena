@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { spawn } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { ClaudeAgent, findClaudePath, makeCleanEnv } from './ClaudeAgent';
 import { GeminiAgent, findGeminiPath } from './GeminiAgent';
 import { AIAgent, DebateMessage, DebateState, ModelAlias, Persona, Provider, TokenUsage } from './types';
@@ -30,6 +30,13 @@ export class DebateManager extends EventEmitter {
   private _providerA: Provider = 'claude';
   private _providerB: Provider = 'claude';
   private _showSummary = true;
+  private _summaryProc: ChildProcess | null = null;
+
+  // Consensus gauge tracking (0-100 per agent)
+  private _consensusScoreA = 0;
+  private _consensusScoreB = 0;
+  private _hasScoreA = false;
+  private _hasScoreB = false;
 
   // Persistent agents — maintain their own CLI sessions
   private agentA: AIAgent | null = null;
@@ -57,6 +64,8 @@ export class DebateManager extends EventEmitter {
       await this.stop();
       await sleep(300);
     }
+    // Kill any lingering summary from previous debate
+    this.killSummaryProc();
 
     this.state = {
       status: 'running',
@@ -70,6 +79,10 @@ export class DebateManager extends EventEmitter {
     this._nameA = nameA || 'Agent A';
     this._nameB = nameB || 'Agent B';
     this._seekConsensus = seekConsensus;
+    this._consensusScoreA = 0;
+    this._consensusScoreB = 0;
+    this._hasScoreA = false;
+    this._hasScoreB = false;
     this._showSummary = showSummary;
     this._modelA = modelA;
     this._modelB = modelB;
@@ -121,6 +134,8 @@ export class DebateManager extends EventEmitter {
     this.loopId++;
     this.abortController?.abort();
     this.abortController = null;
+    // Kill any in-flight summary process
+    this.killSummaryProc();
     // Agents are discarded — sessions end naturally
     this.agentA = null;
     this.agentB = null;
@@ -165,15 +180,41 @@ export class DebateManager extends EventEmitter {
 
       if (!response || id !== this.loopId || this.state.status !== 'running') { return; }
 
+      // Strip any markdown bold/italic markers that agents may include despite instructions
+      const cleanText = response.text.replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1');
+
       const message: DebateMessage = {
         agent: this.state.currentTurn,
         persona: currentPersona,
-        content: response.text,
+        content: cleanText,
         timestamp: Date.now(),
         usage: response.usage,
       };
 
-      // Strip consensus marker from displayed text
+      // Parse consensus score [CONSENSUS:XX] from response
+      const scoreMatch = response.text.match(/\[CONSENSUS:(\d{1,3})\]/);
+      if (this._seekConsensus && scoreMatch) {
+        const score = Math.min(100, Math.max(0, parseInt(scoreMatch[1], 10)));
+        if (isA) {
+          this._consensusScoreA = score;
+          this._hasScoreA = true;
+        } else {
+          this._consensusScoreB = score;
+          this._hasScoreB = true;
+        }
+        // Strip the score marker from displayed text
+        message.content = message.content.replace(/\s*\[CONSENSUS:\d{1,3}\]\s*/g, '').trim();
+        // Only emit gauge once both agents have reported at least once
+        if (this._hasScoreA && this._hasScoreB) {
+          this.emit('consensusGauge', {
+            scoreA: this._consensusScoreA,
+            scoreB: this._consensusScoreB,
+            average: Math.round((this._consensusScoreA + this._consensusScoreB) / 2),
+          });
+        }
+      }
+
+      // Strip consensus reached marker from displayed text
       const hasConsensus = response.text.includes('[CONSENSUS_REACHED]');
       if (hasConsensus) {
         message.content = message.content.replace(/\s*\[CONSENSUS_REACHED\]\s*/g, '').trim();
@@ -185,8 +226,8 @@ export class DebateManager extends EventEmitter {
       }
       this.emit('message', message);
 
-      // Auto-stop when consensus is reached
-      if (this._seekConsensus && hasConsensus) {
+      // Auto-stop when consensus is reached (both agents must have high scores)
+      if (this._seekConsensus && hasConsensus && this._consensusScoreA >= 70 && this._consensusScoreB >= 70) {
         this.state.status = 'stopped';
         this.emit('consensus');
         this.emitStateChange();
@@ -216,6 +257,13 @@ export class DebateManager extends EventEmitter {
 
   private emitStateChange(): void {
     this.emit('stateChange', this.state.status);
+  }
+
+  private killSummaryProc(): void {
+    if (this._summaryProc) {
+      try { this._summaryProc.kill('SIGTERM'); } catch { /* already dead */ }
+      this._summaryProc = null;
+    }
   }
 
   private generateSummary(): void {
@@ -261,6 +309,7 @@ ${transcript}
       stdio: ['ignore', 'pipe', 'pipe'],
       env,
     });
+    this._summaryProc = proc;
 
     let stdout = '';
     proc.stdout.on('data', (data: Buffer) => { stdout += data.toString(); });
@@ -272,6 +321,9 @@ ${transcript}
 
     proc.on('close', (code) => {
       clearTimeout(timeout);
+      // Discard result if this process was already replaced or killed
+      if (this._summaryProc !== proc) { return; }
+      this._summaryProc = null;
       if (code !== 0) { return; }
       try {
         const parsed = JSON.parse(stdout);

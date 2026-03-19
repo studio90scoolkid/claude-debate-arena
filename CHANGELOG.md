@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.0] - 2026-03-19
+
+### Added
+- Consensus gauge — real-time progress bar in the status bar showing how close agents are to agreement
+- Self-reported consensus scoring — each agent rates agreement level (0-100) via `[CONSENSUS:XX]` marker every turn
+- Color-coded gauge transitions: red (0-30%) → yellow (30-60%) → green (60-100%)
+- Full i18n for consensus gauge label across all 32 languages
+
+### Changed
+- **Natural consensus flow** — removed rigid turn-based consensus forcing; agents now debate genuinely and only converge when truly persuaded
+- Consensus strategy hints extended from 5 to 9+ turns for deeper discussions before agreement
+- Consensus only triggers when both agents report 70%+ agreement (previously triggered after ~3 turns)
+- Gauge only updates after both agents have reported at least one score
+- Agent names are now locked (disabled) during active debate
+
+### Fixed
+- Moderator summary from previous debate leaking into new debate — summary process is now tracked and killed on stop/restart
+
+### Removed
+- Message count and token usage display from status bar (cleaner UI)
+
 ## [0.4.1] - 2026-03-18
 
 ### Added

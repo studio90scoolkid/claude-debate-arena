@@ -333,11 +333,6 @@ html[data-lang="fa"] .btn-group {
   color: var(--text-secondary);
 }
 
-.token-info {
-  font-size: 10px;
-  color: var(--accent-yellow);
-  font-family: 'Courier New', monospace;
-}
 
 /* ===== RPG Buttons ===== */
 .rpg-btn {
@@ -813,7 +808,11 @@ html[data-lang="fa"] .btn-group {
   color: var(--text-secondary);
   display: flex;
   justify-content: space-between;
+  align-items: center;
   flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  max-height: 24px;
 }
 
 .status-bar .status-dot {
@@ -854,6 +853,51 @@ html[data-lang="fa"] .btn-group {
   border-color: var(--accent-yellow);
   outline-color: var(--accent-yellow);
   box-shadow: 0 0 4px rgba(255,213,79,0.5);
+}
+
+/* ===== Consensus Gauge ===== */
+.status-bar-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.consensus-gauge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.consensus-gauge-label {
+  font-size: 9px;
+  color: var(--accent-yellow);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.consensus-gauge-bar {
+  display: inline-block;
+  width: 80px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #4a4a6a;
+  position: relative;
+  overflow: hidden;
+}
+
+.consensus-gauge-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--accent-red);
+  transition: width 0.6s ease-out, background 0.6s ease-out;
+  box-shadow: 0 0 4px currentColor;
+}
+
+.consensus-gauge-value {
+  font-size: 10px;
+  color: var(--text-primary);
+  font-family: 'Courier New', monospace;
 }
 
 /* Character idle animation handled by sprite sheet frames in JS */

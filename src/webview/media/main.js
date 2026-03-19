@@ -42,6 +42,7 @@
       seekConsensus: 'Seek Consensus',
       showSummary: 'Moderator Summary',
       consensusReached: 'CONSENSUS REACHED — Both agents have found common ground.',
+      consensusGaugeLabel: 'CONSENSUS',
       moderatorSummary: 'MODERATOR SUMMARY',
       summaryLoading: 'The moderator is preparing a summary...',
     },
@@ -80,6 +81,7 @@
       seekConsensus: '합의점 찾기',
       showSummary: '토론 정리',
       consensusReached: '합의 도달 — 양측이 공통점을 찾았습니다.',
+      consensusGaugeLabel: '합의도',
       moderatorSummary: '사회자 정리',
       summaryLoading: '사회자가 토론을 정리하고 있습니다...',
     },
@@ -115,6 +117,7 @@
       seekConsensus: '合意を目指す',
       showSummary: '司会者まとめ',
       consensusReached: '合意に達しました — 両者が共通点を見つけました。',
+      consensusGaugeLabel: '合意度',
     },
     zh: {
       checking: '检查中...',
@@ -148,6 +151,7 @@
       seekConsensus: '寻求共识',
       showSummary: '主持人总结',
       consensusReached: '达成共识 — 双方找到了共同点。',
+      consensusGaugeLabel: '共识度',
     },
     // === European Languages ===
     de: {
@@ -168,6 +172,7 @@
       seekConsensus: 'Konsens suchen',
       showSummary: 'Moderator-Zusammenfassung',
       consensusReached: 'KONSENS ERREICHT — Beide Seiten haben Gemeinsamkeiten gefunden.',
+      consensusGaugeLabel: 'KONSENS',
     },
     fr: {
       checking: 'VÉRIFICATION...', connected: 'CONNECTÉ', disconnected: 'DÉCONNECTÉ', notConnected: 'NON CONNECTÉ !',
@@ -187,6 +192,7 @@
       seekConsensus: 'Chercher un consensus',
       showSummary: 'Résumé du modérateur',
       consensusReached: 'CONSENSUS ATTEINT — Les deux agents ont trouvé un terrain d\'entente.',
+      consensusGaugeLabel: 'CONSENSUS',
     },
     es: {
       checking: 'VERIFICANDO...', connected: 'CONECTADO', disconnected: 'DESCONECTADO', notConnected: '¡NO CONECTADO!',
@@ -206,6 +212,7 @@
       seekConsensus: 'Buscar consenso',
       showSummary: 'Resumen del moderador',
       consensusReached: 'CONSENSO ALCANZADO — Ambos agentes han encontrado puntos en común.',
+      consensusGaugeLabel: 'CONSENSO',
     },
     pt: {
       checking: 'VERIFICANDO...', connected: 'CONECTADO', disconnected: 'DESCONECTADO', notConnected: 'NÃO CONECTADO!',
@@ -225,6 +232,7 @@
       seekConsensus: 'Buscar consenso',
       showSummary: 'Resumo do moderador',
       consensusReached: 'CONSENSO ALCANÇADO — Ambos os agentes encontraram pontos em comum.',
+      consensusGaugeLabel: 'CONSENSO',
     },
     it: {
       checking: 'VERIFICA...', connected: 'CONNESSO', disconnected: 'DISCONNESSO', notConnected: 'NON CONNESSO!',
@@ -244,6 +252,7 @@
       seekConsensus: 'Cercare consenso',
       showSummary: 'Riepilogo del moderatore',
       consensusReached: 'CONSENSO RAGGIUNTO — Entrambi gli agenti hanno trovato un terreno comune.',
+      consensusGaugeLabel: 'CONSENSO',
     },
     nl: {
       checking: 'CONTROLEREN...', connected: 'VERBONDEN', disconnected: 'NIET VERBONDEN', notConnected: 'NIET VERBONDEN!',
@@ -263,6 +272,7 @@
       seekConsensus: 'Consensus zoeken',
       showSummary: 'Samenvatting moderator',
       consensusReached: 'CONSENSUS BEREIKT — Beide agenten hebben een gemeenschappelijke basis gevonden.',
+      consensusGaugeLabel: 'CONSENSUS',
     },
     pl: {
       checking: 'SPRAWDZANIE...', connected: 'POŁĄCZONO', disconnected: 'ROZŁĄCZONO', notConnected: 'NIE POŁĄCZONO!',
@@ -282,6 +292,7 @@
       seekConsensus: 'Szukaj konsensusu',
       showSummary: 'Podsumowanie moderatora',
       consensusReached: 'KONSENSUS OSIĄGNIĘTY — Obie strony znalazły wspólny grunt.',
+      consensusGaugeLabel: 'KONSENSUS',
     },
     ru: {
       checking: 'ПРОВЕРКА...', connected: 'ПОДКЛЮЧЕНО', disconnected: 'ОТКЛЮЧЕНО', notConnected: 'НЕ ПОДКЛЮЧЕНО!',
@@ -301,6 +312,7 @@
       seekConsensus: 'Искать консенсус',
       showSummary: 'Итоги модератора',
       consensusReached: 'КОНСЕНСУС ДОСТИГНУТ — Обе стороны нашли общую позицию.',
+      consensusGaugeLabel: 'КОНСЕНСУС',
     },
     uk: {
       checking: 'ПЕРЕВІРКА...', connected: 'ПІДКЛЮЧЕНО', disconnected: 'ВІДКЛЮЧЕНО', notConnected: 'НЕ ПІДКЛЮЧЕНО!',
@@ -320,6 +332,7 @@
       seekConsensus: 'Шукати консенсус',
       showSummary: 'Підсумки модератора',
       consensusReached: 'КОНСЕНСУС ДОСЯГНУТО — Обидві сторони знайшли спільну позицію.',
+      consensusGaugeLabel: 'КОНСЕНСУС',
     },
     cs: {
       checking: 'KONTROLA...', connected: 'PŘIPOJENO', disconnected: 'ODPOJENO', notConnected: 'NEPŘIPOJENO!',
@@ -339,6 +352,7 @@
       seekConsensus: 'Hledat konsensus',
       showSummary: 'Shrnutí moderátora',
       consensusReached: 'KONSENSUS DOSAŽEN — Obě strany našly společnou řeč.',
+      consensusGaugeLabel: 'KONSENSUS',
     },
     sv: {
       checking: 'KONTROLLERAR...', connected: 'ANSLUTEN', disconnected: 'FRÅNKOPPLAD', notConnected: 'EJ ANSLUTEN!',
@@ -358,6 +372,7 @@
       seekConsensus: 'Sök konsensus',
       showSummary: 'Moderatorsammanfattning',
       consensusReached: 'KONSENSUS UPPNÅDD — Båda sidor har hittat gemensam mark.',
+      consensusGaugeLabel: 'KONSENSUS',
     },
     da: {
       checking: 'KONTROLLERER...', connected: 'FORBUNDET', disconnected: 'AFBRUDT', notConnected: 'IKKE FORBUNDET!',
@@ -377,6 +392,7 @@
       seekConsensus: 'Søg konsensus',
       showSummary: 'Moderatoropsummering',
       consensusReached: 'KONSENSUS OPNÅET — Begge sider har fundet fælles grund.',
+      consensusGaugeLabel: 'KONSENSUS',
     },
     fi: {
       checking: 'TARKISTETAAN...', connected: 'YHDISTETTY', disconnected: 'YHTEYS KATKAISTU', notConnected: 'EI YHTEYTTÄ!',
@@ -396,6 +412,7 @@
       seekConsensus: 'Etsi yhteisymmärrystä',
       showSummary: 'Moderaattorin yhteenveto',
       consensusReached: 'YHTEISYMMÄRRYS SAAVUTETTU — Molemmat osapuolet löysivät yhteisen pohjan.',
+      consensusGaugeLabel: 'KONSENSUS',
     },
     nb: {
       checking: 'SJEKKER...', connected: 'TILKOBLET', disconnected: 'FRAKOBLET', notConnected: 'IKKE TILKOBLET!',
@@ -415,6 +432,7 @@
       seekConsensus: 'Søk konsensus',
       showSummary: 'Moderatoroppsummering',
       consensusReached: 'KONSENSUS OPPNÅDD — Begge sider har funnet felles grunn.',
+      consensusGaugeLabel: 'KONSENSUS',
     },
     tr: {
       checking: 'KONTROL EDİLİYOR...', connected: 'BAĞLI', disconnected: 'BAĞLI DEĞİL', notConnected: 'BAĞLI DEĞİL!',
@@ -434,6 +452,7 @@
       seekConsensus: 'Uzlaşı ara',
       showSummary: 'Moderatör özeti',
       consensusReached: 'UZLAŞI SAĞLANDI — Her iki taraf da ortak bir zemin buldu.',
+      consensusGaugeLabel: 'UZLAŞI',
     },
     el: {
       checking: 'ΕΛΕΓΧΟΣ...', connected: 'ΣΥΝΔΕΔΕΜΕΝΟ', disconnected: 'ΑΠΟΣΥΝΔΕΜΕΝΟ', notConnected: 'ΜΗ ΣΥΝΔΕΔΕΜΕΝΟ!',
@@ -453,6 +472,7 @@
       seekConsensus: 'Αναζήτηση συναίνεσης',
       showSummary: 'Σύνοψη συντονιστή',
       consensusReached: 'ΣΥΝΑΙΝΕΣΗ ΕΠΙΤΕΥΧΘΗΚΕ — Και οι δύο πλευρές βρήκαν κοινό έδαφος.',
+      consensusGaugeLabel: 'ΣΥΝΑΙΝΕΣΗ',
     },
     hu: {
       checking: 'ELLENŐRZÉS...', connected: 'CSATLAKOZVA', disconnected: 'LEVÁLASZTVA', notConnected: 'NINCS CSATLAKOZVA!',
@@ -472,6 +492,7 @@
       seekConsensus: 'Konszenzust keresni',
       showSummary: 'Moderátor összefoglalója',
       consensusReached: 'KONSZENZUS ELÉRVE — Mindkét fél közös alapot talált.',
+      consensusGaugeLabel: 'KONSZENZUS',
     },
     ro: {
       checking: 'VERIFICARE...', connected: 'CONECTAT', disconnected: 'DECONECTAT', notConnected: 'NECONECTAT!',
@@ -491,6 +512,7 @@
       seekConsensus: 'Căutare consens',
       showSummary: 'Rezumatul moderatorului',
       consensusReached: 'CONSENS ATINS — Ambele părți au găsit un teren comun.',
+      consensusGaugeLabel: 'CONSENS',
     },
     // === Additional Asian Languages ===
     th: {
@@ -511,6 +533,7 @@
       seekConsensus: 'หาฉันทามติ',
       showSummary: 'สรุปจากผู้ดำเนินรายการ',
       consensusReached: 'บรรลุฉันทามติ — ทั้งสองฝ่ายพบจุดร่วม',
+      consensusGaugeLabel: 'ฉันทามติ',
     },
     vi: {
       checking: 'ĐANG KIỂM TRA...', connected: 'ĐÃ KẾT NỐI', disconnected: 'NGẮT KẾT NỐI', notConnected: 'CHƯA KẾT NỐI!',
@@ -530,6 +553,7 @@
       seekConsensus: 'Tìm đồng thuận',
       showSummary: 'Tóm tắt của người điều hành',
       consensusReached: 'ĐẠT ĐỒNG THUẬN — Cả hai bên đã tìm được tiếng nói chung.',
+      consensusGaugeLabel: 'ĐỒNG THUẬN',
     },
     id: {
       checking: 'MEMERIKSA...', connected: 'TERHUBUNG', disconnected: 'TERPUTUS', notConnected: 'TIDAK TERHUBUNG!',
@@ -549,6 +573,7 @@
       seekConsensus: 'Cari konsensus',
       showSummary: 'Ringkasan moderator',
       consensusReached: 'KONSENSUS TERCAPAI — Kedua agen menemukan titik temu.',
+      consensusGaugeLabel: 'KONSENSUS',
     },
     ms: {
       checking: 'MENYEMAK...', connected: 'DISAMBUNG', disconnected: 'TERPUTUS', notConnected: 'TIDAK DISAMBUNG!',
@@ -568,6 +593,7 @@
       seekConsensus: 'Cari konsensus',
       showSummary: 'Rumusan moderator',
       consensusReached: 'KONSENSUS DICAPAI — Kedua-dua pihak menemui titik persamaan.',
+      consensusGaugeLabel: 'KONSENSUS',
     },
     hi: {
       checking: 'जाँच हो रही है...', connected: 'कनेक्टेड', disconnected: 'डिस्कनेक्टेड', notConnected: 'कनेक्ट नहीं!',
@@ -587,6 +613,7 @@
       seekConsensus: 'सहमति खोजें',
       showSummary: 'संचालक सारांश',
       consensusReached: 'सहमति प्राप्त — दोनों पक्षों ने समान आधार पाया।',
+      consensusGaugeLabel: 'सहमति',
     },
     bn: {
       checking: 'যাচাই হচ্ছে...', connected: 'সংযুক্ত', disconnected: 'সংযোগ বিচ্ছিন্ন', notConnected: 'সংযুক্ত নয়!',
@@ -606,6 +633,7 @@
       seekConsensus: 'ঐকমত্য খোঁজা',
       showSummary: 'সঞ্চালকের সারসংক্ষেপ',
       consensusReached: 'ঐকমত্যে পৌঁছানো হয়েছে — উভয় পক্ষ সাধারণ ভিত্তি খুঁজে পেয়েছে।',
+      consensusGaugeLabel: 'ঐকমত্য',
     },
     // === Middle Eastern Languages ===
     ar: {
@@ -626,6 +654,7 @@
       seekConsensus: 'البحث عن توافق',
       showSummary: 'ملخص المشرف',
       consensusReached: 'تم التوصل إلى توافق — وجد كلا الطرفين أرضية مشتركة.',
+      consensusGaugeLabel: 'توافق',
     },
     he: {
       checking: 'בודק...', connected: 'מחובר', disconnected: 'מנותק', notConnected: 'לא מחובר!',
@@ -645,6 +674,7 @@
       seekConsensus: 'חיפוש הסכמה',
       showSummary: 'סיכום המנחה',
       consensusReached: 'הושגה הסכמה — שני הצדדים מצאו בסיס משותף.',
+      consensusGaugeLabel: 'הסכמה',
     },
     fa: {
       checking: 'در حال بررسی...', connected: 'متصل', disconnected: 'قطع شده', notConnected: 'متصل نیست!',
@@ -664,6 +694,7 @@
       seekConsensus: 'جستجوی توافق',
       showSummary: 'خلاصه مجری',
       consensusReached: 'توافق حاصل شد — هر دو طرف زمینه مشترکی پیدا کردند.',
+      consensusGaugeLabel: 'توافق',
     },
   };
 
@@ -725,8 +756,6 @@
   /** @type {HTMLElement} */
   const statusText = document.getElementById('statusText');
   /** @type {HTMLElement} */
-  const msgCount = document.getElementById('msgCount');
-  /** @type {HTMLElement} */
   const connDotClaude = document.getElementById('connDotClaude');
   /** @type {HTMLElement} */
   const connLabelClaude = document.getElementById('connLabelClaude');
@@ -744,15 +773,16 @@
   const connInfo = document.getElementById('connInfo');
 
   /** @type {HTMLElement} */
-  const tokenInfo = document.getElementById('tokenInfo');
+  const consensusGaugeEl = document.getElementById('consensusGauge');
+  /** @type {HTMLElement} */
+  const consensusGaugeFill = document.getElementById('consensusGaugeFill');
+  /** @type {HTMLElement} */
+  const consensusGaugeValue = document.getElementById('consensusGaugeValue');
 
   let isConnected = false;
   let claudeAvailable = false;
   let geminiAvailable = false;
-  let messageCount = 0;
   let currentStatus = 'idle';
-  let totalInputTokens = 0;
-  let totalOutputTokens = 0;
 
   // ===== Provider-dependent Model Lists =====
   const CLAUDE_MODELS = [
@@ -1067,29 +1097,6 @@
 
     chatArea.appendChild(wrapper);
     chatArea.scrollTop = chatArea.scrollHeight;
-
-    messageCount++;
-    msgCount.textContent = `${t('messages').replace('0', '')}${messageCount}`;
-
-    // Update token usage
-    if (msg.usage) {
-      totalInputTokens += msg.usage.inputTokens || 0;
-      totalOutputTokens += msg.usage.outputTokens || 0;
-      updateTokenDisplay();
-    }
-  }
-
-  function formatTokens(n) {
-    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
-    return String(n);
-  }
-
-  function updateTokenDisplay() {
-    if (tokenInfo) {
-      const total = totalInputTokens + totalOutputTokens;
-      tokenInfo.textContent = `TOKENS: ${formatTokens(total)} (IN: ${formatTokens(totalInputTokens)} / OUT: ${formatTokens(totalOutputTokens)})`;
-    }
   }
 
   function showThinking(agent) {
@@ -1127,9 +1134,16 @@
       connInfo.textContent = '';
     }
 
+    // Hide consensus gauge when idle
+    if (status === 'idle' && consensusGaugeEl) {
+      consensusGaugeEl.style.display = 'none';
+    }
+
     startBtn.disabled = status === 'running';
     pauseBtn.disabled = status !== 'running' && status !== 'paused';
     stopBtn.disabled = status === 'idle' || status === 'stopped';
+    nameAInput.disabled = status === 'running';
+    nameBInput.disabled = status === 'running';
     topicInput.disabled = status === 'running';
     personaASelect.disabled = status === 'running';
     personaBSelect.disabled = status === 'running';
@@ -1224,11 +1238,18 @@
     }
 
     chatArea.innerHTML = '';
-    messageCount = 0;
-    totalInputTokens = 0;
-    totalOutputTokens = 0;
-    msgCount.textContent = t('messages');
-    if (tokenInfo) tokenInfo.textContent = '';
+
+    // Show/hide consensus gauge
+    if (consensusGaugeEl) {
+      if (seekConsensusCheck.checked) {
+        consensusGaugeEl.style.display = 'inline-flex';
+        consensusGaugeFill.style.width = '0%';
+        consensusGaugeValue.textContent = '0%';
+        consensusGaugeFill.style.background = 'var(--accent-red)';
+      } else {
+        consensusGaugeEl.style.display = 'none';
+      }
+    }
 
     saveSettings();
 
@@ -1353,12 +1374,36 @@
       case 'loadSettings':
         loadSettings(msg.payload);
         break;
+      case 'consensusGauge': {
+        const gauge = msg.payload;
+        if (consensusGaugeEl) {
+          consensusGaugeEl.style.display = 'inline-flex';
+          const avg = gauge.average;
+          consensusGaugeFill.style.width = avg + '%';
+          consensusGaugeValue.textContent = avg + '%';
+          // Color transitions: red -> yellow -> green
+          if (avg < 30) {
+            consensusGaugeFill.style.background = 'var(--accent-red)';
+          } else if (avg < 60) {
+            consensusGaugeFill.style.background = 'var(--accent-yellow)';
+          } else {
+            consensusGaugeFill.style.background = 'var(--accent-green)';
+          }
+        }
+        break;
+      }
       case 'consensus': {
         const consensusDiv = document.createElement('div');
         consensusDiv.className = 'chat-message consensus-banner';
         consensusDiv.innerHTML = `<div class="consensus-text">${t('consensusReached')}</div>`;
         chatArea.appendChild(consensusDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
+        // Max out the gauge
+        if (consensusGaugeEl) {
+          consensusGaugeFill.style.width = '100%';
+          consensusGaugeValue.textContent = '100%';
+          consensusGaugeFill.style.background = 'var(--accent-green)';
+        }
         break;
       }
       case 'summaryLoading': {

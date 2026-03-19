@@ -68,8 +68,14 @@ export interface AuthStatus {
   error?: string;
 }
 
+export interface ConsensusGauge {
+  scoreA: number;
+  scoreB: number;
+  average: number;
+}
+
 export interface ExtensionMessage {
-  type: 'newMessage' | 'stateChange' | 'error' | 'thinking' | 'connectionStatus' | 'usageUpdate' | 'loadSettings' | 'summary' | 'summaryLoading';
+  type: 'newMessage' | 'stateChange' | 'error' | 'thinking' | 'connectionStatus' | 'loadSettings' | 'summary' | 'summaryLoading' | 'consensusGauge';
   payload: unknown;
 }
 

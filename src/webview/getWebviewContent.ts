@@ -187,10 +187,17 @@ export function getWebviewContent(
 
   <!-- Status Bar -->
   <div class="status-bar">
-    <span><span id="statusDot" class="status-dot"></span><span id="statusText" data-i18n="ready"></span></span>
+    <span class="status-bar-left">
+      <span><span id="statusDot" class="status-dot"></span><span id="statusText" data-i18n="ready"></span></span>
+      <span id="consensusGauge" class="consensus-gauge" style="display:none;">
+        <span class="consensus-gauge-label" data-i18n="consensusGaugeLabel"></span>
+        <span class="consensus-gauge-bar">
+          <span id="consensusGaugeFill" class="consensus-gauge-fill"></span>
+        </span>
+        <span id="consensusGaugeValue" class="consensus-gauge-value">0%</span>
+      </span>
+    </span>
     <span id="connInfo" class="conn-info"></span>
-    <span id="tokenInfo" class="token-info"></span>
-    <span id="msgCount" data-i18n="messages"></span>
   </div>
 
   <script nonce="${nonce}">${jsContent}</script>

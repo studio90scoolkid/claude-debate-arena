@@ -76,6 +76,12 @@ export class DebatePanel {
       }
     });
 
+    this.debateManager.on('consensusGauge', (gauge: { scoreA: number; scoreB: number; average: number }) => {
+      if (!this.disposed) {
+        this.panel.webview.postMessage({ type: 'consensusGauge', payload: gauge });
+      }
+    });
+
     this.debateManager.on('summaryLoading', () => {
       if (!this.disposed) {
         this.panel.webview.postMessage({ type: 'summaryLoading', payload: null });

@@ -2,7 +2,7 @@
   "name": "claude-talk",
   "displayName": "Claude Talk",
   "description": "Two AI agents debate any topic to spark insights, expand ideas, and explore deeper — powered by Claude and Gemini CLI",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "publisher": "STUDIOCOOLKID",
   "license": "MIT",
   "repository": {
