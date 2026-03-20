@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.3] - 2026-03-20
+
+### Changed
+- Complete overhaul of debate system prompts for natural, conversational tone — agents now sound like sharp friends arguing, not academics writing papers
+- Language-specific tone guides for Korean, Japanese, Chinese, and English with concrete register examples (e.g., ~거든/~잖아 for Korean, contractions for English)
+- Persona prompts rewritten with distinct personalities and argumentation styles for Pro, Neutral, and Con
+- First-turn prompt redesigned to produce direct openers instead of generic "I believe" statements
+- Follow-up turn structure changed from rigid 3-part format to natural response flow
+- Moderator summary prompt updated to neutral recap style (no more "audience" or "viewers" references)
+- Provider auth checks now run independently — UI unlocks per-provider as each check completes
+- Start button enables as soon as selected providers are ready, without waiting for all checks
+
+### Added
+- Em-dash (—) ban enforced in prompts to prevent unnatural punctuation
+- Anti-flattery and anti-rhetorical-question rules to maintain debate tension
+- `updateStartBtnState()` function for smarter start button state management
+- Per-provider `providerReady` message type for incremental UI updates
+
 ## [0.5.2] - 2026-03-19
 
 ### Changed

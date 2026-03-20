@@ -81,7 +81,8 @@ Two AI agents debating from different perspectives can do more than entertain:
 Each agent maintains its own **persistent CLI session** throughout the debate. This means:
 - **Full context retention** — each CLI natively remembers the entire debate history per agent
 - **Language-neutral prompts** — agents automatically respond in the same language as your topic
-- **Structured debate flow** — agents must rebut, present new evidence, and challenge each turn
+- **Natural debate tone** — language-specific register guides make agents sound like real people, not essay writers
+- **Structured debate flow** — agents must engage with opponent's claims, then bring new substance each turn
 - **Debate progress tracking** — argument history prevents repetition and keeps debates advancing
 - **Consensus gauge** — in consensus mode, a live progress bar tracks how close agents are to agreement
 - **Lower token usage** — no need to resend history every turn
