@@ -16,7 +16,11 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/studio90scoolkid/claude-talk/main/screenshot_1.png" width="800" alt="Claude Talk Screenshot">
+  <img src="https://raw.githubusercontent.com/studio90scoolkid/claude-talk/main/screenshot_1.png" width="800" alt="Claude Talk - General Mode">
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/studio90scoolkid/claude-talk/main/screenshot_2.png" width="800" alt="Claude Talk - Code Mode">
 </p>
 
 ---
@@ -34,6 +38,7 @@ Two AI agents debating from different perspectives can do more than entertain:
 - **Gain fresh insights** — uncover angles you hadn't considered on difficult problems
 - **Expand your ideas** — watch agents build on and challenge a concept from multiple directions
 - **Deep-dive any topic** — explore philosophy, architecture decisions, ethical dilemmas, or technical trade-offs in depth
+- **Debate your code** — in Code Mode, agents read your actual codebase and argue about architecture, security, or design choices with real file references
 - **Break through dead ends** — when you're stuck, let two opposing viewpoints spark a new path forward
 - **Learn by observation** — see how structured arguments are built, countered, and refined in real time
 
@@ -43,6 +48,7 @@ Two AI agents debating from different perspectives can do more than entertain:
 
 | Feature | Description |
 |---------|-------------|
+| **Code Mode** | Toggle codebase-aware debates — agents explore your workspace with file-reading tools and argue with real code evidence |
 | **Multi-Provider Support** | Use **Claude** and **Google Gemini** — mix providers per agent (e.g., Claude vs Gemini) |
 | **Real-time AI Debate** | Two AI agents argue back and forth automatically |
 | **Seek Consensus Mode** | Agents naturally find common ground with a real-time consensus gauge in the status bar |
@@ -119,6 +125,7 @@ English, 한국어, 日本語, 中文, Español, Français, Deutsch, Português,
 
 ## Tips
 
+- **Use Code Mode** — click the `GEN` button to switch to `</>` mode, then debate about your actual codebase ("Is our auth secure?", "Should we refactor the data layer?")
 - **Mix providers** — pit Claude Opus against Gemini 2.5 Pro for cross-model debates
 - **Use different models** for each agent (e.g., Opus vs Haiku) to see how reasoning depth affects arguments
 - **Try unusual topics** — philosophical dilemmas, code architecture debates, or pop culture hot takes work great

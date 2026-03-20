@@ -1,4 +1,4 @@
-import { DebateMessage, Persona, PERSONA_PROMPTS } from './types';
+import { DebateMessage, DebateMode, Persona, PERSONA_PROMPTS } from './types';
 
 const MAX_OPPONENT_MSG_LENGTH = 1000;
 const MAX_SUMMARY_PER_SIDE = 3;
@@ -10,6 +10,7 @@ export interface PromptConfig {
   seekConsensus: boolean;
   allowConcession: boolean;
   turnCount: number;
+  mode?: DebateMode;
 }
 
 /** System prompt: persistent persona + topic anchoring for the entire session */
@@ -70,7 +71,14 @@ Tone (STRICTLY ENFORCED):
 - If you catch yourself sounding like a newspaper column, rewrite it as something you would actually say out loud.
 
 Punctuation rule (strictly enforced):
-The em-dash character is BANNED. You must not write the character "\u2014" anywhere in your response. Not even once. Use a period and start a new sentence instead. Example of what NOT to do: "old bags, old dolls \u2014 these won't do" Example of correct alternative: "Old bags, old dolls. These won't do."${consensusRule}${concessionRule}`;
+The em-dash character is BANNED. You must not write the character "\u2014" anywhere in your response. Not even once. Use a period and start a new sentence instead. Example of what NOT to do: "old bags, old dolls \u2014 these won't do" Example of correct alternative: "Old bags, old dolls. These won't do."${consensusRule}${concessionRule}${config.mode === 'code' ? `
+
+Code analysis mode:
+- You have access to the codebase in your working directory. Use your file-reading tools (Read, Grep, Glob) to explore and reference actual code.
+- Ground your arguments in real code: file paths, function names, patterns you find.
+- When making a technical claim, back it up with evidence from the codebase.
+- Quote short code snippets (under 5 lines) when they strengthen your point.
+- If the topic is about architecture, patterns, or quality, explore the relevant files before arguing.` : ''}`;
 }
 
 /** First turn: introduce position */
@@ -90,7 +98,9 @@ Do NOT:
 DO:
 - State your core claim directly. Get to the point from the first sentence.
 - Support it with one specific, everyday example that anyone can relate to.
-- End with a claim that makes ${config.opponentName} want to push back.`;
+- End with a claim that makes ${config.opponentName} want to push back.${config.mode === 'code' ? `
+
+CODE MODE: Before stating your position, explore the codebase to find relevant files and patterns. Reference actual code (file paths, function names) in your argument.` : ''}`;
 }
 
 /** Build a compact summary of arguments so far from both sides */

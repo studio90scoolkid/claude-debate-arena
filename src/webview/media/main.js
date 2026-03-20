@@ -48,6 +48,9 @@
       consensusGaugeLabel: 'CONSENSUS',
       moderatorSummary: 'SUMMARY',
       summaryLoading: 'Preparing a summary...',
+      modeGeneral: 'General Mode',
+      modeCode: 'Code Mode (codebase-aware)',
+      topicPlaceholderCode: 'Enter code topic... (e.g. Is our auth implementation secure?)',
     },
     ko: {
       checking: '확인 중...',
@@ -90,6 +93,9 @@
       consensusGaugeLabel: '합의도',
       moderatorSummary: '토론 요약',
       summaryLoading: '토론을 요약하고 있습니다...',
+      modeGeneral: '일반 모드',
+      modeCode: '코드 모드 (코드베이스 분석)',
+      topicPlaceholderCode: '코드 주제를 입력하세요... (예: 우리 인증 구현이 안전한가?)',
     },
     ja: {
       checking: '確認中...',
@@ -127,6 +133,9 @@
       debateStopped: '討論終了 — 討論が中断されました。',
       concessionMessage: '敗北宣言 — {conceder}が{winner}に敗北を認めました。',
       consensusGaugeLabel: '合意度',
+      modeGeneral: '一般モード',
+      modeCode: 'コードモード (コードベース分析)',
+      topicPlaceholderCode: 'コードの話題を入力... (例: 認証の実装は安全か？)',
     },
     zh: {
       checking: '检查中...',
@@ -791,6 +800,9 @@
   /** @type {HTMLInputElement} */
   const allowConcessionCheck = document.getElementById('allowConcession');
   /** @type {HTMLButtonElement} */
+  const modeBtn = document.getElementById('modeBtn');
+  let currentMode = 'general'; // 'general' or 'code'
+  /** @type {HTMLButtonElement} */
   const startBtn = document.getElementById('startBtn');
   /** @type {HTMLButtonElement} */
   const pauseBtn = document.getElementById('pauseBtn');
@@ -1226,6 +1238,7 @@
     modelBSelect.disabled = status === 'running';
     if (charASelect) charASelect.disabled = status === 'running';
     if (charBSelect) charBSelect.disabled = status === 'running';
+    modeBtn.disabled = status === 'running';
     seekConsensusCheck.disabled = status === 'running';
     showSummaryCheck.disabled = status === 'running';
     allowConcessionCheck.disabled = status === 'running';
@@ -1259,6 +1272,7 @@
         modelA: modelASelect.value,
         modelB: modelBSelect.value,
         topic: topicInput.value,
+        mode: currentMode,
         seekConsensus: seekConsensusCheck.checked ? 'true' : 'false',
         showSummary: showSummaryCheck.checked ? 'true' : 'false',
         allowConcession: allowConcessionCheck.checked ? 'true' : 'false',
@@ -1278,6 +1292,15 @@
     if (s.modelA) modelASelect.value = s.modelA;
     if (s.modelB) modelBSelect.value = s.modelB;
     if (s.topic) topicInput.value = s.topic;
+    if (s.mode) {
+      currentMode = s.mode;
+      if (currentMode === 'code') {
+        modeBtn.textContent = '</>';
+        modeBtn.classList.add('code-active');
+        modeBtn.title = t('modeCode');
+        topicInput.placeholder = t('topicPlaceholderCode');
+      }
+    }
     if (s.seekConsensus) seekConsensusCheck.checked = s.seekConsensus === 'true';
     if (s.showSummary !== undefined) showSummaryCheck.checked = s.showSummary !== 'false';
     if (s.allowConcession !== undefined) allowConcessionCheck.checked = s.allowConcession !== 'false';
@@ -1354,6 +1377,7 @@
       seekConsensus: seekConsensusCheck.checked,
       showSummary: showSummaryCheck.checked,
       allowConcession: allowConcessionCheck.checked,
+      mode: currentMode,
     });
   });
 
@@ -1383,6 +1407,23 @@
     if (e.key === 'Enter' && !startBtn.disabled) {
       startBtn.click();
     }
+  });
+
+  modeBtn.addEventListener('click', () => {
+    if (currentMode === 'general') {
+      currentMode = 'code';
+      modeBtn.textContent = '</>';
+      modeBtn.classList.add('code-active');
+      modeBtn.title = t('modeCode');
+      topicInput.placeholder = t('topicPlaceholderCode');
+    } else {
+      currentMode = 'general';
+      modeBtn.textContent = 'GEN';
+      modeBtn.classList.remove('code-active');
+      modeBtn.title = t('modeGeneral');
+      topicInput.placeholder = t('topicPlaceholder');
+    }
+    saveSettings();
   });
 
   // Character select handlers

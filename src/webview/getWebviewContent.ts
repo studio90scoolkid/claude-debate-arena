@@ -84,6 +84,7 @@ export function getWebviewContent(
   <!-- Setup Panel -->
   <div class="setup-panel">
     <div class="topic-row">
+      <button id="modeBtn" class="ctrl-btn ctrl-mode" data-i18n-title="modeGeneral" title="General">GEN</button>
       <input type="text" id="topicInput" class="topic-input" data-i18n-placeholder="topicPlaceholder">
       <div class="control-buttons">
         <button id="startBtn" class="ctrl-btn ctrl-play" data-i18n-title="startBattle">▶</button>

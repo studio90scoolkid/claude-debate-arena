@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.0] - 2026-03-20
+
+### Added
+- **Code Mode** — new toggle button (`GEN` / `</>`) before the topic input that switches between general debate and codebase-aware debate
+- In Code Mode, agents explore the workspace using file-reading tools (Read, Grep, Glob) and ground their arguments in actual code
+- Claude agents get `--allowedTools Read,Grep,Glob` with `cwd` set to the workspace root (read-only access)
+- Gemini agents get `--sandbox` with `cwd` set to the workspace root
+- Code-analysis system prompt instructs agents to reference file paths, function names, and short code snippets
+- Mode persists across sessions via settings auto-save
+- i18n for mode button tooltips and code-mode placeholder (EN, KO, JA; others fallback to English)
+- Error message when Code Mode is used without an open workspace folder
+
+### Changed
+- Stronger language enforcement for Gemini — `CRITICAL LANGUAGE REMINDER` appended at the end of both first-turn and follow-up prompts to prevent language mismatch (e.g., Korean responses to English topics)
+
 ## [0.5.4] - 2026-03-20
 
 ### Added

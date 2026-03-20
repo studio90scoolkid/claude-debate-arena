@@ -1,6 +1,6 @@
 import { spawn, execSync } from 'child_process';
 import * as vscode from 'vscode';
-import { AIAgent, Persona, GeminiModelAlias, DebateMessage, TokenUsage } from './types';
+import { AIAgent, Persona, GeminiModelAlias, DebateMessage, DebateMode, TokenUsage } from './types';
 import { PromptConfig, buildSystemPrompt, buildFirstTurnPrompt, buildFollowUpPrompt } from './promptBuilder';
 
 const TIMEOUT_MS = 60_000;
@@ -186,6 +186,8 @@ export class GeminiAgent implements AIAgent {
     public readonly opponentName: string = 'Agent B',
     public readonly seekConsensus: boolean = false,
     public readonly allowConcession: boolean = true,
+    public readonly mode: DebateMode = 'general',
+    public readonly cwd?: string,
   ) {}
 
   async respond(
@@ -197,9 +199,12 @@ export class GeminiAgent implements AIAgent {
     this._topic = topic;
     const isFirstTurn = this.turnCount === 1;
     const config = this.promptConfig;
-    const prompt = isFirstTurn
+    let prompt = isFirstTurn
       ? this.buildGeminiFirstTurnPrompt(config, topic)
       : buildFollowUpPrompt(config, topic, history);
+    if (!isFirstTurn) {
+      prompt += `\n\nCRITICAL: Respond in the SAME language as "${topic}".`;
+    }
     return this.callGemini(prompt, signal, isFirstTurn);
   }
 
@@ -211,6 +216,7 @@ export class GeminiAgent implements AIAgent {
       seekConsensus: this.seekConsensus,
       allowConcession: this.allowConcession,
       turnCount: this.turnCount,
+      mode: this.mode,
     };
   }
 
@@ -221,7 +227,7 @@ export class GeminiAgent implements AIAgent {
   private buildGeminiFirstTurnPrompt(config: PromptConfig, topic: string): string {
     const systemPrompt = buildSystemPrompt(config, topic);
     const taskPrompt = buildFirstTurnPrompt(config, topic);
-    return `[SYSTEM INSTRUCTIONS]\n${systemPrompt}\n\n[YOUR TASK]\n${taskPrompt}`;
+    return `[SYSTEM INSTRUCTIONS]\n${systemPrompt}\n\n[YOUR TASK]\n${taskPrompt}\n\nCRITICAL LANGUAGE REMINDER: Detect the language of the topic "${topic}" and respond ENTIRELY in that language. If the topic is in English, respond in English. If in Korean, respond in Korean. Match the topic's language exactly.`;
   }
 
   private callGemini(
@@ -240,6 +246,9 @@ export class GeminiAgent implements AIAgent {
       const env = makeCleanEnv();
 
       const args = ['-p', prompt, '--output-format', 'json', '-m', this.model];
+      if (this.mode === 'code') {
+        args.push('--sandbox');
+      }
       if (!isFirstTurn && this.sessionId) {
         // Resume existing session
         args.push('--resume', this.sessionId);
@@ -254,10 +263,14 @@ export class GeminiAgent implements AIAgent {
       const safeResolve = (val: { text: string; usage?: TokenUsage }) => { if (!settled) { settled = true; resolve(val); } };
       const safeReject = (err: Error) => { if (!settled) { settled = true; reject(err); } };
 
-      const proc = spawn(geminiPath, args, {
+      const spawnOpts: { stdio: ['ignore', 'pipe', 'pipe']; env: NodeJS.ProcessEnv; cwd?: string } = {
         stdio: ['ignore', 'pipe', 'pipe'],
         env,
-      });
+      };
+      if (this.mode === 'code' && this.cwd) {
+        spawnOpts.cwd = this.cwd;
+      }
+      const proc = spawn(geminiPath, args, spawnOpts);
 
       let stdout = '';
       let stderr = '';

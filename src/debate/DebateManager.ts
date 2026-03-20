@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { ChildProcess, spawn } from 'child_process';
 import { ClaudeAgent, findClaudePath, makeCleanEnv } from './ClaudeAgent';
 import { GeminiAgent, findGeminiPath } from './GeminiAgent';
-import { AIAgent, DebateMessage, DebateState, ModelAlias, Persona, Provider, TokenUsage } from './types';
+import { AIAgent, DebateMessage, DebateMode, DebateState, ModelAlias, Persona, Provider, TokenUsage } from './types';
 
 const MAX_MESSAGES = 200;
 
@@ -31,6 +31,8 @@ export class DebateManager extends EventEmitter {
   private _providerB: Provider = 'claude';
   private _showSummary = true;
   private _allowConcession = true;
+  private _mode: DebateMode = 'general';
+  private _cwd?: string;
   private _summaryProc: ChildProcess | null = null;
 
   // Consensus gauge tracking (0-100 per agent)
@@ -60,6 +62,8 @@ export class DebateManager extends EventEmitter {
     providerB: Provider = 'claude',
     showSummary = true,
     allowConcession = true,
+    mode: DebateMode = 'general',
+    cwd?: string,
   ): Promise<void> {
     // Stop any existing debate
     if (this.state.status === 'running' || this.state.status === 'paused') {
@@ -87,14 +91,16 @@ export class DebateManager extends EventEmitter {
     this._hasScoreB = false;
     this._showSummary = showSummary;
     this._allowConcession = allowConcession;
+    this._mode = mode;
+    this._cwd = cwd;
     this._modelA = modelA;
     this._modelB = modelB;
     this._providerA = providerA;
     this._providerB = providerB;
 
     // Create persistent agents with their own sessions
-    this.agentA = this.createAgent(providerA, this._nameA, personaA, modelA, this._nameB, seekConsensus, allowConcession);
-    this.agentB = this.createAgent(providerB, this._nameB, personaB, modelB, this._nameA, seekConsensus, allowConcession);
+    this.agentA = this.createAgent(providerA, this._nameA, personaA, modelA, this._nameB, seekConsensus, allowConcession, mode, cwd);
+    this.agentB = this.createAgent(providerB, this._nameB, personaB, modelB, this._nameA, seekConsensus, allowConcession, mode, cwd);
 
     this.abortController = new AbortController();
     const myLoopId = ++this.loopId;
@@ -269,11 +275,13 @@ export class DebateManager extends EventEmitter {
     opponentName: string,
     seekConsensus: boolean,
     allowConcession: boolean,
+    mode: DebateMode = 'general',
+    cwd?: string,
   ): AIAgent {
     if (provider === 'gemini') {
-      return new GeminiAgent(name, persona, model as any, opponentName, seekConsensus, allowConcession);
+      return new GeminiAgent(name, persona, model as any, opponentName, seekConsensus, allowConcession, mode, cwd);
     }
-    return new ClaudeAgent(name, persona, model as any, opponentName, seekConsensus, allowConcession);
+    return new ClaudeAgent(name, persona, model as any, opponentName, seekConsensus, allowConcession, mode, cwd);
   }
 
   private emitStateChange(): void {

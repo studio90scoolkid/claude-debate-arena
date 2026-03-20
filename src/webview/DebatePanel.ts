@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { DebateManager } from '../debate/DebateManager';
 import { checkClaudeAuth } from '../debate/ClaudeAgent';
 import { checkGeminiAuth } from '../debate/GeminiAgent';
-import { DebateMessage, ModelAlias, Persona, Provider, WebviewMessage } from '../debate/types';
+import { DebateMessage, DebateMode, ModelAlias, Persona, Provider, WebviewMessage } from '../debate/types';
 import { getWebviewContent } from './getWebviewContent';
 
 const SETTINGS_KEY = 'debate.lastSettings';
@@ -17,6 +17,7 @@ interface DebateSettings {
   modelA?: string;
   modelB?: string;
   topic?: string;
+  mode?: string;
 }
 
 export class DebatePanel {
@@ -186,6 +187,14 @@ export class DebatePanel {
     switch (message.type) {
       case 'startDebate':
         if (message.topic) {
+          const mode: DebateMode = message.mode || 'general';
+          const workspaceRoot = mode === 'code'
+            ? vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
+            : undefined;
+          if (mode === 'code' && !workspaceRoot) {
+            this.panel.webview.postMessage({ type: 'error', payload: 'Code mode requires an open workspace folder.' });
+            break;
+          }
           this.debateManager.startDebate(
             message.topic,
             (message.personaA as Persona) || 'pro',
@@ -199,6 +208,8 @@ export class DebatePanel {
             (message.providerB as Provider) || 'claude',
             message.showSummary !== false,
             message.allowConcession !== false,
+            mode,
+            workspaceRoot,
           );
         }
         break;

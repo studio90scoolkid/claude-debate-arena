@@ -1,7 +1,7 @@
 import { spawn, execSync } from 'child_process';
 import { randomUUID } from 'crypto';
 import * as vscode from 'vscode';
-import { AIAgent, Persona, ClaudeModelAlias, AuthStatus, DebateMessage, TokenUsage } from './types';
+import { AIAgent, Persona, ClaudeModelAlias, AuthStatus, DebateMessage, DebateMode, TokenUsage } from './types';
 import { PromptConfig, buildSystemPrompt, buildFirstTurnPrompt, buildFollowUpPrompt } from './promptBuilder';
 
 const TIMEOUT_MS = 60_000;
@@ -156,6 +156,8 @@ export class ClaudeAgent implements AIAgent {
     public readonly opponentName: string = 'Agent B',
     public readonly seekConsensus: boolean = false,
     public readonly allowConcession: boolean = true,
+    public readonly mode: DebateMode = 'general',
+    public readonly cwd?: string,
   ) {
     this.sessionId = randomUUID();
   }
@@ -183,6 +185,7 @@ export class ClaudeAgent implements AIAgent {
       seekConsensus: this.seekConsensus,
       allowConcession: this.allowConcession,
       turnCount: this.turnCount,
+      mode: this.mode,
     };
   }
 
@@ -202,6 +205,9 @@ export class ClaudeAgent implements AIAgent {
       const env = makeCleanEnv();
 
       const args = ['-p', prompt, '--output-format', 'json', '--model', this.model];
+      if (this.mode === 'code') {
+        args.push('--allowedTools', 'Read,Grep,Glob');
+      }
       if (isFirstTurn) {
         // Create a new session with system prompt
         args.push('--session-id', this.sessionId);
@@ -219,10 +225,14 @@ export class ClaudeAgent implements AIAgent {
       const safeResolve = (val: { text: string; usage?: TokenUsage }) => { if (!settled) { settled = true; resolve(val); } };
       const safeReject = (err: Error) => { if (!settled) { settled = true; reject(err); } };
 
-      const proc = spawn(claudePath, args, {
+      const spawnOpts: { stdio: ['ignore', 'pipe', 'pipe']; env: NodeJS.ProcessEnv; cwd?: string } = {
         stdio: ['ignore', 'pipe', 'pipe'],
         env,
-      });
+      };
+      if (this.mode === 'code' && this.cwd) {
+        spawnOpts.cwd = this.cwd;
+      }
+      const proc = spawn(claudePath, args, spawnOpts);
 
       let stdout = '';
       let stderr = '';

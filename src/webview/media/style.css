@@ -268,6 +268,37 @@ html[data-lang="fa"] .btn-group {
   box-shadow: 2px 2px 0 #8e0000;
 }
 
+.ctrl-mode {
+  background: #37474f;
+  border-color: #78909c;
+  box-shadow: 2px 2px 0 #263238;
+  font-size: 9px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.ctrl-mode:hover {
+  background: #455a64;
+}
+
+.ctrl-mode.code-active {
+  background: #4a148c;
+  border-color: #ab47bc;
+  box-shadow: 2px 2px 0 #311b92;
+  animation: codeGlow 2s ease-in-out infinite alternate;
+}
+
+.ctrl-mode.code-active:hover {
+  background: #6a1b9a;
+}
+
+@keyframes codeGlow {
+  from { box-shadow: 2px 2px 0 #311b92; }
+  to { box-shadow: 2px 2px 0 #311b92, 0 0 6px rgba(171, 71, 188, 0.5); }
+}
+
 .topic-input {
   flex: 1;
   background: var(--bg-dark);

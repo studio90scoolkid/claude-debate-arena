@@ -27,6 +27,7 @@ export interface DebateMessage {
 }
 
 export type DebateStatus = 'idle' | 'running' | 'paused' | 'stopped';
+export type DebateMode = 'general' | 'code';
 
 export interface DebateState {
   status: DebateStatus;
@@ -57,6 +58,7 @@ export interface WebviewMessage {
   seekConsensus?: boolean;
   showSummary?: boolean;
   allowConcession?: boolean;
+  mode?: DebateMode;
   settings?: Record<string, string>;
 }
 
