@@ -280,16 +280,18 @@ export class DebateManager extends EventEmitter {
       return `[${name}]: ${m.content}`;
     }).join('\n\n');
 
-    const prompt = `You are a debate moderator/host. The following is a transcript of a debate between "${nameA}" and "${nameB}" on the topic: "${topic}".
+    const prompt = `You are writing a recap of a debate between "${nameA}" and "${nameB}" on the topic: "${topic}".
 
-Please provide a concise moderator's summary that includes:
-1. The main arguments each side presented
-2. Key points of agreement or disagreement
-3. Which arguments were strongest
-4. A brief closing remark as a moderator
+Write a neutral summary for someone reading the debate log afterward. There is no live audience.
+
+Include:
+1. Each side's core argument in 1-2 sentences
+2. Where they agreed and where they stayed apart
+3. Which argument landed hardest and why
+4. One sentence closing thought on what this debate revealed
 
 IMPORTANT: Respond in the SAME LANGUAGE as the debate topic "${topic}". Detect the language and use it.
-Keep the summary to 5-8 sentences. Use plain text only, no markdown formatting.
+Keep it to 5-8 sentences. Plain text only, no markdown. Do NOT address "viewers" or "audience" — just summarize directly. Do not overuse dashes (—).
 
 --- DEBATE TRANSCRIPT ---
 ${transcript}

@@ -137,12 +137,29 @@ export class DebatePanel {
       payload: { status: 'checking' },
     });
 
-    const [claudeAuth, geminiAuth] = await Promise.all([
-      checkClaudeAuth(),
-      checkGeminiAuth(),
-    ]);
+    // Check each provider independently so the UI can unlock as soon as the selected provider is ready
+    const claudePromise = checkClaudeAuth().then((auth) => {
+      if (this.disposed) { return; }
+      this.panel.webview.postMessage({
+        type: 'connectionStatus',
+        payload: { status: 'providerReady', provider: 'claude', available: auth.loggedIn, email: auth.email, subscription: auth.subscriptionType, error: auth.error },
+      });
+      return auth;
+    });
 
-    if (this.disposed) { return; }
+    const geminiPromise = checkGeminiAuth().then((auth) => {
+      if (this.disposed) { return; }
+      this.panel.webview.postMessage({
+        type: 'connectionStatus',
+        payload: { status: 'providerReady', provider: 'gemini', available: auth.loggedIn, installed: !!auth.installed, email: auth.email, error: auth.error },
+      });
+      return auth;
+    });
+
+    const [claudeAuth, geminiAuth] = await Promise.all([claudePromise, geminiPromise]);
+    if (this.disposed || !claudeAuth || !geminiAuth) { return; }
+
+    // Send final combined status for overall UI update
     this.panel.webview.postMessage({
       type: 'connectionStatus',
       payload: {

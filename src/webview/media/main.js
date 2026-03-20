@@ -815,6 +815,8 @@
   const consensusGaugeValue = document.getElementById('consensusGaugeValue');
 
   let isConnected = false;
+  let claudeCheckDone = false;  // per-provider auth check status
+  let geminiCheckDone = false;
   let claudeAvailable = false;
   let geminiAvailable = false;
   let currentStatus = 'idle';
@@ -849,8 +851,8 @@
     }
   }
 
-  providerASelect.addEventListener('change', () => updateModelOptions(providerASelect, modelASelect));
-  providerBSelect.addEventListener('change', () => updateModelOptions(providerBSelect, modelBSelect));
+  providerASelect.addEventListener('change', () => { updateModelOptions(providerASelect, modelASelect); updateStartBtnState(); });
+  providerBSelect.addEventListener('change', () => { updateModelOptions(providerBSelect, modelBSelect); updateStartBtnState(); });
 
   /** Update the two provider connection indicators */
   function setProviderStatus(provider, status) {
@@ -862,6 +864,18 @@
 
   function setAccountInfo(el, text) {
     el.textContent = text;
+  }
+
+  /** Check if the start button should be enabled based on selected providers' auth status */
+  function updateStartBtnState() {
+    if (currentStatus === 'running') {
+      startBtn.disabled = true;
+      return;
+    }
+    const needClaude = providerASelect.value === 'claude' || providerBSelect.value === 'claude';
+    const needGemini = providerASelect.value === 'gemini' || providerBSelect.value === 'gemini';
+    const blocked = (needClaude && !claudeCheckDone) || (needGemini && !geminiCheckDone);
+    startBtn.disabled = blocked;
   }
 
   /** Disable provider options that are not available */
@@ -1184,6 +1198,7 @@
     }
 
     startBtn.disabled = status === 'running';
+    if (status !== 'running') { updateStartBtnState(); }
     pauseBtn.disabled = status !== 'running' && status !== 'paused';
     stopBtn.disabled = status === 'idle' || status === 'stopped';
     nameAInput.disabled = status === 'running';
@@ -1325,6 +1340,9 @@
   });
 
   connRefresh.addEventListener('click', () => {
+    claudeCheckDone = false;
+    geminiCheckDone = false;
+    updateStartBtnState();
     setProviderStatus('claude', 'checking');
     setProviderStatus('gemini', 'checking');
     connInfo.textContent = '';
@@ -1373,21 +1391,53 @@
       case 'connectionStatus': {
         const conn = msg.payload;
         if (conn.status === 'checking') {
+          claudeCheckDone = false;
+          geminiCheckDone = false;
           setProviderStatus('claude', 'checking');
           setProviderStatus('gemini', 'checking');
           setAccountInfo(connAccountClaude, '');
           setAccountInfo(connAccountGemini, '');
           isConnected = false;
           connInfo.textContent = '';
+          updateStartBtnState();
+        } else if (conn.status === 'providerReady') {
+          // Individual provider check completed — unlock start button as soon as selected providers are ready
+          if (conn.provider === 'claude') {
+            claudeCheckDone = true;
+            claudeAvailable = !!conn.available;
+            setProviderStatus('claude', claudeAvailable ? 'connected' : 'disconnected');
+            if (claudeAvailable) {
+              const parts = [];
+              if (conn.email) parts.push(conn.email);
+              if (conn.subscription) parts.push(conn.subscription.toUpperCase());
+              setAccountInfo(connAccountClaude, parts.length ? parts.join(' · ') : '');
+            } else {
+              setAccountInfo(connAccountClaude, '');
+              if (conn.error) connInfo.textContent = conn.error;
+            }
+          } else if (conn.provider === 'gemini') {
+            geminiCheckDone = true;
+            geminiAvailable = !!conn.available;
+            const geminiStatus = geminiAvailable ? 'connected' : (conn.installed ? 'warning' : 'disconnected');
+            setProviderStatus('gemini', geminiStatus);
+            setAccountInfo(connAccountGemini, geminiAvailable && conn.email ? conn.email : '');
+            if (!geminiAvailable && conn.error) {
+              const prev = connInfo.textContent;
+              connInfo.textContent = prev ? prev + ' | ' + conn.error : conn.error;
+            }
+          }
+          isConnected = claudeAvailable || geminiAvailable;
+          updateStartBtnState();
         } else if (conn.status === 'connected') {
+          // Final combined status — update everything to final state
+          claudeCheckDone = true;
+          geminiCheckDone = true;
           claudeAvailable = !!conn.claudeAvailable;
           geminiAvailable = !!conn.geminiAvailable;
           isConnected = claudeAvailable || geminiAvailable;
           setProviderStatus('claude', claudeAvailable ? 'connected' : 'disconnected');
-          // Gemini: 3 states - connected (green), installed but not authed (yellow), not installed (red)
           const geminiStatus = geminiAvailable ? 'connected' : (conn.geminiInstalled ? 'warning' : 'disconnected');
           setProviderStatus('gemini', geminiStatus);
-          // Show account info next to each provider in top bar
           if (claudeAvailable) {
             const parts = [];
             if (conn.claudeEmail) parts.push(conn.claudeEmail);
@@ -1397,13 +1447,16 @@
             setAccountInfo(connAccountClaude, '');
           }
           setAccountInfo(connAccountGemini, geminiAvailable && conn.geminiEmail ? conn.geminiEmail : '');
-          // Show errors in bottom status bar
           const errors = [];
           if (!claudeAvailable && conn.claudeError) errors.push(conn.claudeError);
           if (!geminiAvailable && conn.geminiError) errors.push(conn.geminiError);
           connInfo.textContent = errors.join(' | ');
           updateProviderOptions();
+          updateStartBtnState();
         } else {
+          // disconnected
+          claudeCheckDone = true;
+          geminiCheckDone = true;
           setProviderStatus('claude', 'disconnected');
           setProviderStatus('gemini', 'disconnected');
           isConnected = false;
@@ -1416,6 +1469,7 @@
           if (conn.geminiError) errors.push(conn.geminiError);
           connInfo.textContent = errors.join(' | ') || '';
           updateProviderOptions();
+          updateStartBtnState();
         }
         break;
       }
