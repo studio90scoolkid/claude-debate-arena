@@ -61,6 +61,7 @@ Two AI agents debating from different perspectives can do more than entertain:
 | **Persistent Sessions** | Each agent maintains its own CLI session with full context retention |
 | **30+ Languages** | Full UI localization — Korean, Japanese, Chinese, Spanish, French, and more |
 | **Auto-save Settings** | Your last configuration is restored automatically |
+| **Window Persistence** | Detach the panel to a separate window or move between editor groups without losing your debate |
 | **Debate Controls** | Compact player-style controls (▶ ⏸ ⏹) — pause, resume, or stop debates with a visible end-of-debate banner |
 
 ---

@@ -843,6 +843,107 @@
   let geminiAvailable = false;
   let currentStatus = 'idle';
 
+  // ===== Helpers =====
+  function escapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ===== Webview State Persistence =====
+  // Tracks chat entries so state survives window detach/reattach
+  let chatEntries = [];
+  let lastConsensusGauge = null;
+
+  function persistState() {
+    vscode.setState({
+      chatEntries,
+      currentStatus,
+      currentMode,
+      consensusGauge: lastConsensusGauge,
+    });
+  }
+
+  function replayChatEntries(entries) {
+    chatArea.innerHTML = '';
+    for (const entry of entries) {
+      switch (entry.type) {
+        case 'message':
+          addMessage(entry.data, true);
+          break;
+        case 'consensus': {
+          const div = document.createElement('div');
+          div.className = 'chat-message consensus-banner';
+          div.innerHTML = `<div class="consensus-text">${t('consensusReached')}</div>`;
+          chatArea.appendChild(div);
+          break;
+        }
+        case 'concession': {
+          const div = document.createElement('div');
+          div.className = 'chat-message consensus-banner';
+          const text = t('concessionMessage').replace('{conceder}', escapeHtml(entry.data.conceder)).replace('{winner}', escapeHtml(entry.data.winner));
+          div.innerHTML = `<div class="consensus-text">${text}</div>`;
+          chatArea.appendChild(div);
+          break;
+        }
+        case 'summary': {
+          const div = document.createElement('div');
+          div.className = 'chat-message summary-banner';
+          div.innerHTML = `<div class="summary-header">${t('moderatorSummary')}</div><div class="summary-content">${escapeHtml(entry.data)}</div>`;
+          chatArea.appendChild(div);
+          break;
+        }
+        case 'summaryLoading': {
+          const div = document.createElement('div');
+          div.className = 'chat-message summary-loading';
+          div.innerHTML = `<div class="summary-loading-text">${t('summaryLoading')}</div>`;
+          chatArea.appendChild(div);
+          break;
+        }
+        case 'stopped': {
+          const div = document.createElement('div');
+          div.className = 'chat-message consensus-banner';
+          div.innerHTML = `<div class="consensus-text">${t('debateStopped')}</div>`;
+          chatArea.appendChild(div);
+          break;
+        }
+        case 'error': {
+          const div = document.createElement('div');
+          div.className = 'chat-message agent-a';
+          div.style.alignSelf = 'center';
+          div.style.maxWidth = '100%';
+          const bubble = document.createElement('div');
+          bubble.className = 'speech-bubble';
+          bubble.style.background = '#4a1a1a';
+          bubble.style.outlineColor = '#ef5350';
+          const content = document.createElement('div');
+          content.className = 'bubble-content';
+          content.style.color = '#ef5350';
+          content.textContent = '\u26A0 ' + entry.data;
+          bubble.appendChild(content);
+          div.appendChild(bubble);
+          chatArea.appendChild(div);
+          break;
+        }
+      }
+    }
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  function restoreConsensusGauge(gauge) {
+    if (!gauge || !consensusGaugeEl) return;
+    lastConsensusGauge = gauge;
+    consensusGaugeEl.style.display = 'inline-flex';
+    const avg = gauge.average;
+    consensusGaugeFill.style.width = avg + '%';
+    consensusGaugeValue.textContent = avg + '%';
+    if (avg < 30) {
+      consensusGaugeFill.style.background = 'var(--accent-red)';
+    } else if (avg < 60) {
+      consensusGaugeFill.style.background = 'var(--accent-yellow)';
+    } else {
+      consensusGaugeFill.style.background = 'var(--accent-green)';
+    }
+  }
+
   // ===== Provider-dependent Model Lists =====
   const CLAUDE_MODELS = [
     { value: 'haiku', i18n: 'modelHaiku' },
@@ -1119,7 +1220,7 @@
   }
 
   // ===== Chat Messages =====
-  function addMessage(msg) {
+  function addMessage(msg, skipPersist) {
     const thinking = document.querySelector('.thinking-indicator');
     if (thinking) thinking.remove();
     const welcome = document.querySelector('.welcome');
@@ -1168,6 +1269,11 @@
 
     chatArea.appendChild(wrapper);
     chatArea.scrollTop = chatArea.scrollHeight;
+
+    if (!skipPersist) {
+      chatEntries.push({ type: 'message', data: { agent: msg.agent, persona: msg.persona, content: msg.content, timestamp: msg.timestamp } });
+      persistState();
+    }
   }
 
   function showThinking(agent) {
@@ -1193,7 +1299,7 @@
     chatArea.scrollTop = chatArea.scrollHeight;
   }
 
-  function updateState(status) {
+  function updateState(status, skipBanner) {
     currentStatus = status;
     statusDot.className = `status-dot ${status}`;
 
@@ -1205,18 +1311,21 @@
       connInfo.textContent = '';
     }
 
-    // Show stopped banner in chat (skip if consensus or concession banner already shown)
-    if (status === 'stopped') {
+    // Show stopped banner in chat (skip if consensus or concession banner already shown, or if replaying)
+    if (status === 'stopped' && !skipBanner) {
       const lastBanner = chatArea.querySelector('.chat-message:last-child');
-      const hasFinalBanner = lastBanner && lastBanner.classList.contains('consensus-banner');
+      const hasFinalBanner = lastBanner && (lastBanner.classList.contains('consensus-banner') || lastBanner.classList.contains('stopped-banner'));
       if (!hasFinalBanner) {
         const stoppedDiv = document.createElement('div');
         stoppedDiv.className = 'chat-message stopped-banner';
         stoppedDiv.innerHTML = `<div class="stopped-text">${t('debateStopped')}</div>`;
         chatArea.appendChild(stoppedDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
+        chatEntries.push({ type: 'stopped' });
       }
     }
+
+    persistState();
 
     // Hide consensus gauge when idle
     if (status === 'idle' && consensusGaugeEl) {
@@ -1341,6 +1450,8 @@
     }
 
     chatArea.innerHTML = '';
+    chatEntries = [];
+    lastConsensusGauge = null;
 
     // Show/hide consensus gauge
     if (consensusGaugeEl) {
@@ -1537,20 +1648,9 @@
         break;
       case 'consensusGauge': {
         const gauge = msg.payload;
-        if (consensusGaugeEl) {
-          consensusGaugeEl.style.display = 'inline-flex';
-          const avg = gauge.average;
-          consensusGaugeFill.style.width = avg + '%';
-          consensusGaugeValue.textContent = avg + '%';
-          // Color transitions: red -> yellow -> green
-          if (avg < 30) {
-            consensusGaugeFill.style.background = 'var(--accent-red)';
-          } else if (avg < 60) {
-            consensusGaugeFill.style.background = 'var(--accent-yellow)';
-          } else {
-            consensusGaugeFill.style.background = 'var(--accent-green)';
-          }
-        }
+        lastConsensusGauge = gauge;
+        restoreConsensusGauge(gauge);
+        persistState();
         break;
       }
       case 'consensus': {
@@ -1565,16 +1665,21 @@
           consensusGaugeValue.textContent = '100%';
           consensusGaugeFill.style.background = 'var(--accent-green)';
         }
+        lastConsensusGauge = { scoreA: 100, scoreB: 100, average: 100 };
+        chatEntries.push({ type: 'consensus' });
+        persistState();
         break;
       }
       case 'concession': {
-        const { conceder, winner } = message.payload;
+        const { conceder, winner } = msg.payload;
         const concessionDiv = document.createElement('div');
         concessionDiv.className = 'chat-message consensus-banner';
-        const concessionText = t('concessionMessage').replace('{conceder}', conceder).replace('{winner}', winner);
+        const concessionText = t('concessionMessage').replace('{conceder}', escapeHtml(conceder)).replace('{winner}', escapeHtml(winner));
         concessionDiv.innerHTML = `<div class="consensus-text">${concessionText}</div>`;
         chatArea.appendChild(concessionDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
+        chatEntries.push({ type: 'concession', data: { conceder, winner } });
+        persistState();
         break;
       }
       case 'summaryLoading': {
@@ -1586,6 +1691,10 @@
         loadingDiv.innerHTML = `<div class="summary-loading-text">${t('summaryLoading')}</div>`;
         chatArea.appendChild(loadingDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
+        // Replace any existing summaryLoading entry
+        chatEntries = chatEntries.filter(e => e.type !== 'summaryLoading');
+        chatEntries.push({ type: 'summaryLoading' });
+        persistState();
         break;
       }
       case 'summary': {
@@ -1594,9 +1703,12 @@
         if (loadingEl) loadingEl.remove();
         const summaryDiv = document.createElement('div');
         summaryDiv.className = 'chat-message summary-banner';
-        summaryDiv.innerHTML = `<div class="summary-header">${t('moderatorSummary')}</div><div class="summary-content">${msg.payload}</div>`;
+        summaryDiv.innerHTML = `<div class="summary-header">${t('moderatorSummary')}</div><div class="summary-content">${escapeHtml(msg.payload)}</div>`;
         chatArea.appendChild(summaryDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
+        chatEntries = chatEntries.filter(e => e.type !== 'summaryLoading');
+        chatEntries.push({ type: 'summary', data: msg.payload });
+        persistState();
         break;
       }
       case 'error': {
@@ -1616,6 +1728,35 @@
         errorDiv.appendChild(errorBubble);
         chatArea.appendChild(errorDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
+        chatEntries.push({ type: 'error', data: msg.payload });
+        persistState();
+        break;
+      }
+      case 'restoreState': {
+        const restore = msg.payload;
+
+        // Always clear stale UI (welcome screen, old thinking indicators) when restoring
+        const welcomeEl = chatArea.querySelector('.welcome');
+        if (welcomeEl) welcomeEl.remove();
+        const thinkingEl = chatArea.querySelector('.thinking-indicator');
+        if (thinkingEl) thinkingEl.remove();
+
+        if (restore.messages && restore.messages.length > 0) {
+          const backendMessages = restore.messages.map(m => ({ type: 'message', data: { agent: m.agent, persona: m.persona, content: m.content, timestamp: m.timestamp } }));
+          const nonMessageEntries = chatEntries.filter(e => e.type !== 'message');
+          chatEntries = [...backendMessages, ...nonMessageEntries];
+          replayChatEntries(chatEntries);
+        }
+        if (restore.consensusGauge) {
+          restoreConsensusGauge(restore.consensusGauge);
+        }
+        if (restore.status) {
+          updateState(restore.status, true);
+        }
+        // If debate is running, show thinking indicator after all messages
+        if (restore.status === 'running' && restore.currentTurn) {
+          showThinking(restore.currentTurn);
+        }
         break;
       }
     }
@@ -1650,6 +1791,29 @@
 
   // ===== Init =====
   applyI18n();
-  showWelcome();
-  updateState('idle');
+
+  // Restore from saved webview state (survives window detach/reattach)
+  const previousState = vscode.getState();
+  if (previousState && previousState.chatEntries && previousState.chatEntries.length > 0) {
+    chatEntries = previousState.chatEntries;
+    currentMode = previousState.currentMode || 'general';
+    if (currentMode === 'code') {
+      modeBtn.textContent = '</>';
+      modeBtn.classList.add('code-active');
+      modeBtn.title = t('modeCode');
+      topicInput.placeholder = t('topicPlaceholderCode');
+    }
+    replayChatEntries(chatEntries);
+    updateState(previousState.currentStatus || 'idle', true);
+    if (previousState.consensusGauge) {
+      restoreConsensusGauge(previousState.consensusGauge);
+    }
+  } else {
+    showWelcome();
+    updateState('idle');
+  }
+  // Always ask extension host for latest state — handles both:
+  // 1. getState() returned cached entries → sync with backend for any missed messages
+  // 2. getState() returned null (window move) → backend has the authoritative state
+  vscode.postMessage({ type: 'requestState' });
 })();

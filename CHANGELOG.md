@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.6.1] - 2026-03-21
+
+### Added
+- **Webview state persistence** — debate messages, settings, thinking indicator, and consensus gauge now survive window detach/reattach and auxiliary window moves
+- `WebviewPanelSerializer` registration so VS Code can restore the panel after window moves without losing the running debate
+- `onWebviewPanel:aiDebate` activation event for reliable panel deserialization
+- Chat messages are now persisted to `globalState` (disk) as a fallback when in-memory state is lost during extension restarts
+- `requestState` / `restoreState` message pair — webview always requests authoritative state from the extension host on init
+- Shared `DebateManager` — the debate engine instance is reused across panel dispose/revive cycles so running debates are not interrupted
+
+### Fixed
+- **Window detach/reattach losing all UI state** — moving the panel to a separate window or between editor groups no longer resets the debate to the initial screen
+- Thinking indicator ("...") now restored after window move when a debate is running
+- Welcome screen no longer persists behind restored messages after a window move
+- Turn counter no longer double-increments on retry — `turnCount` is now derived from history length instead of being mutably incremented
+- `buildFollowUpPrompt` safety fallback when called with empty history (treats as first turn instead of crashing)
+
+### Changed
+- `DebatePanel.dispose()` no longer stops the debate or destroys the `DebateManager` — only removes event listeners so the panel can be revived with state intact
+- `DebateSettings` interface extended with `providerA`, `providerB`, `seekConsensus`, `showSummary`, `allowConcession` fields
+- HTML-escape agent names and summary text before `innerHTML` insertion to prevent XSS
+- Stopped banner deduplication — `updateState('stopped')` now checks for existing `stopped-banner` elements and accepts a `skipBanner` parameter for restore paths
+
 ## [0.6.0] - 2026-03-20
 
 ### Added

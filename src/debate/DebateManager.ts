@@ -49,6 +49,12 @@ export class DebateManager extends EventEmitter {
     return { ...this.state, messages: [...this.state.messages] };
   }
 
+  getConsensusGauge(): { scoreA: number; scoreB: number; average: number } | null {
+    if (!this._seekConsensus) { return null; }
+    const avg = Math.round((this._consensusScoreA + this._consensusScoreB) / 2);
+    return { scoreA: this._consensusScoreA, scoreB: this._consensusScoreB, average: avg };
+  }
+
   async startDebate(
     topic: string,
     personaA: Persona = 'pro',

@@ -127,6 +127,10 @@ export function buildDebateProgress(config: PromptConfig, history: DebateMessage
 
 /** Subsequent turns: respond to opponent's latest message with turn-aware strategy */
 export function buildFollowUpPrompt(config: PromptConfig, topic: string, history: DebateMessage[]): string {
+  if (history.length === 0) {
+    // Safety fallback: if called with empty history, treat as first turn
+    return buildFirstTurnPrompt(config, topic);
+  }
   const lastMsg = history[history.length - 1];
   const opponentText = lastMsg.content.length > MAX_OPPONENT_MSG_LENGTH
     ? lastMsg.content.slice(0, MAX_OPPONENT_MSG_LENGTH) + '...'

@@ -6,6 +6,7 @@ import { DebateMessage, DebateMode, ModelAlias, Persona, Provider, WebviewMessag
 import { getWebviewContent } from './getWebviewContent';
 
 const SETTINGS_KEY = 'debate.lastSettings';
+const CHAT_STATE_KEY = 'debate.chatState';
 
 interface DebateSettings {
   nameA?: string;
@@ -14,15 +15,23 @@ interface DebateSettings {
   personaB?: string;
   charA?: string;
   charB?: string;
+  providerA?: string;
+  providerB?: string;
   modelA?: string;
   modelB?: string;
   topic?: string;
   mode?: string;
+  seekConsensus?: string;
+  showSummary?: string;
+  allowConcession?: string;
 }
 
 export class DebatePanel {
   public static currentPanel: DebatePanel | undefined;
-  private static readonly viewType = 'aiDebate';
+  public static readonly viewType = 'aiDebate';
+
+  // Shared DebateManager survives panel disposal so running debates persist across window moves
+  private static sharedDebateManager: DebateManager | undefined;
 
   private readonly panel: vscode.WebviewPanel;
   private readonly extensionUri: vscode.Uri;
@@ -35,7 +44,16 @@ export class DebatePanel {
     this.panel = panel;
     this.extensionUri = extensionUri;
     this.context = context;
-    this.debateManager = new DebateManager();
+
+    // Reuse existing DebateManager if available (e.g. after window detach/reattach)
+    if (DebatePanel.sharedDebateManager) {
+      this.debateManager = DebatePanel.sharedDebateManager;
+      // Clear old listeners from previous panel
+      this.debateManager.removeAllListeners();
+    } else {
+      this.debateManager = new DebateManager();
+      DebatePanel.sharedDebateManager = this.debateManager;
+    }
 
     this.panel.webview.html = getWebviewContent(this.panel.webview, this.extensionUri, vscode.env.language);
 
@@ -50,6 +68,8 @@ export class DebatePanel {
     this.debateManager.on('message', (msg: DebateMessage) => {
       if (!this.disposed) {
         this.panel.webview.postMessage({ type: 'newMessage', payload: msg });
+        // Persist messages to disk so they survive extension restarts / window moves
+        this.persistChatState();
       }
     });
 
@@ -62,6 +82,7 @@ export class DebatePanel {
     this.debateManager.on('stateChange', (status: string) => {
       if (!this.disposed) {
         this.panel.webview.postMessage({ type: 'stateChange', payload: status });
+        this.persistChatState();
       }
     });
 
@@ -195,6 +216,8 @@ export class DebatePanel {
             this.panel.webview.postMessage({ type: 'error', payload: 'Code mode requires an open workspace folder.' });
             break;
           }
+          // Clear persisted chat state for new debate
+          this.context.globalState.update(CHAT_STATE_KEY, undefined);
           this.debateManager.startDebate(
             message.topic,
             (message.personaA as Persona) || 'pro',
@@ -230,17 +253,84 @@ export class DebatePanel {
           this.context.globalState.update(SETTINGS_KEY, message.settings);
         }
         break;
+      case 'requestState': {
+        // Re-send current debate state so the webview can restore after being recreated
+        const debateState = this.debateManager.getState();
+        const gauge = this.debateManager.getConsensusGauge();
+        let messages = debateState.messages;
+        let status = debateState.status;
+
+        // If in-memory DebateManager has no messages, fall back to disk
+        if (messages.length === 0) {
+          const saved = this.context.globalState.get<{ status: string; messages: DebateMessage[] }>(CHAT_STATE_KEY);
+          if (saved && saved.messages && saved.messages.length > 0) {
+            messages = saved.messages;
+            status = saved.status || 'stopped';
+          }
+        }
+
+        this.panel.webview.postMessage({
+          type: 'restoreState',
+          payload: {
+            status,
+            messages,
+            consensusGauge: gauge,
+            currentTurn: debateState.currentTurn,
+          },
+        });
+        // Also re-send saved settings
+        const savedSettings = this.context.globalState.get<DebateSettings>(SETTINGS_KEY);
+        if (savedSettings) {
+          this.panel.webview.postMessage({ type: 'loadSettings', payload: savedSettings });
+        }
+        // Re-check connection
+        this.checkConnection();
+        break;
+      }
     }
+  }
+
+  /** Save current debate messages to globalState so they survive extension restarts. */
+  private persistChatState(): void {
+    const state = this.debateManager.getState();
+    // Only store essential fields to keep globalState lean
+    const trimmed = state.messages.map(m => ({
+      agent: m.agent,
+      persona: m.persona,
+      content: m.content,
+      timestamp: m.timestamp,
+    }));
+    this.context.globalState.update(CHAT_STATE_KEY, {
+      status: state.status,
+      messages: trimmed,
+    });
+  }
+
+  /** Fully stop the debate and destroy the shared manager (called on extension deactivate). */
+  public static destroySharedManager(): void {
+    if (DebatePanel.sharedDebateManager) {
+      DebatePanel.sharedDebateManager.stop();
+      DebatePanel.sharedDebateManager.removeAllListeners();
+      DebatePanel.sharedDebateManager = undefined;
+    }
+  }
+
+  /**
+   * Revive a panel that was serialized (e.g. after window detach/reattach).
+   * Called by the WebviewPanelSerializer registered in extension.ts.
+   */
+  public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext): void {
+    DebatePanel.currentPanel = new DebatePanel(panel, extensionUri, context);
   }
 
   private dispose(): void {
     if (this.disposed) { return; }
     this.disposed = true;
     DebatePanel.currentPanel = undefined;
-    this.debateManager.stop();
+    // Do NOT stop or destroy the shared DebateManager here — it may be reused after a revive.
+    // Only remove listeners so the dead panel doesn't receive events.
     this.debateManager.removeAllListeners();
 
-    this.panel.dispose();
     while (this.disposables.length) {
       const d = this.disposables.pop();
       if (d) { d.dispose(); }

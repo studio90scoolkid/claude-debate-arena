@@ -15,10 +15,18 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }),
   );
+
+  // Register serializer so the webview can be restored after window detach/reattach
+  vscode.window.registerWebviewPanelSerializer(DebatePanel.viewType, {
+    async deserializeWebviewPanel(panel: vscode.WebviewPanel, _state: unknown) {
+      DebatePanel.revive(panel, context.extensionUri, context);
+    },
+  });
 }
 
 export async function deactivate() {
   if (DebatePanel.currentPanel) {
     await DebatePanel.currentPanel.stop();
   }
+  DebatePanel.destroySharedManager();
 }

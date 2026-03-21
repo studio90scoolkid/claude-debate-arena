@@ -195,9 +195,10 @@ export class GeminiAgent implements AIAgent {
     history: DebateMessage[],
     signal?: AbortSignal,
   ): Promise<{ text: string; usage?: TokenUsage }> {
-    this.turnCount++;
+    // Derive turnCount from history length so retries don't double-increment
+    this.turnCount = Math.floor(history.length / 2) + 1;
     this._topic = topic;
-    const isFirstTurn = this.turnCount === 1;
+    const isFirstTurn = history.length === 0;
     const config = this.promptConfig;
     let prompt = isFirstTurn
       ? this.buildGeminiFirstTurnPrompt(config, topic)

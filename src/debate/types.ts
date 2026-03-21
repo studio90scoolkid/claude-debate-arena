@@ -45,7 +45,7 @@ export type GeminiModelAlias = 'gemini-2.5-flash' | 'gemini-2.5-pro';
 export type ModelAlias = ClaudeModelAlias | GeminiModelAlias;
 
 export interface WebviewMessage {
-  type: 'startDebate' | 'stopDebate' | 'pauseDebate' | 'resumeDebate' | 'checkConnection' | 'saveSettings';
+  type: 'startDebate' | 'stopDebate' | 'pauseDebate' | 'resumeDebate' | 'checkConnection' | 'saveSettings' | 'requestState';
   topic?: string;
   personaA?: Persona;
   personaB?: Persona;
@@ -78,7 +78,7 @@ export interface ConsensusGauge {
 }
 
 export interface ExtensionMessage {
-  type: 'newMessage' | 'stateChange' | 'error' | 'thinking' | 'connectionStatus' | 'loadSettings' | 'summary' | 'summaryLoading' | 'consensusGauge' | 'concession';
+  type: 'newMessage' | 'stateChange' | 'error' | 'thinking' | 'connectionStatus' | 'loadSettings' | 'summary' | 'summaryLoading' | 'consensusGauge' | 'concession' | 'restoreState';
   payload: unknown;
 }
 
