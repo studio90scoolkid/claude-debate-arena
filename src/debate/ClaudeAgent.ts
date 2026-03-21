@@ -23,6 +23,9 @@ export function makeCleanEnv(): NodeJS.ProcessEnv {
   delete env.CLAUDE_CODE_SESSION_ID;
   env.PATH = `${env.PATH}:/usr/local/bin:/opt/homebrew/bin`;
   env.NONINTERACTIVE = '1';
+  // Disable all non-essential telemetry, error reporting, and feedback surveys
+  // See: https://code.claude.com/docs/en/data-usage
+  env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
   return env;
 }
 

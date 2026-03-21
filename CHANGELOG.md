@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2] - 2026-03-21
+
+### Added
+- **Privacy policy** — dedicated `PRIVACY.md` covering data flows, Code Mode file access, model training policies, and third-party service disclaimers
+- **Telemetry disabled by default** — Claude CLI (`CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`) and Gemini CLI (`GEMINI_TELEMETRY_ENABLED=false`, `GEMINI_TELEMETRY_LOG_PROMPTS=false`) telemetry is now automatically disabled for all spawned CLI processes
+- **Privacy & Data Usage** section in README with provider-specific training policies, environment variable details, and link to full privacy policy
+
 ## [0.6.1] - 2026-03-21
 
 ### Added

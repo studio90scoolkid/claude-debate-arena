@@ -124,6 +124,39 @@ English, 한국어, 日本語, 中文, Español, Français, Deutsch, Português,
 
 ---
 
+## Privacy & Data Usage
+
+> **Full privacy policy: [PRIVACY.md](PRIVACY.md)**
+
+Claude Talk spawns CLI processes (Claude CLI / Gemini CLI) to generate debate responses. **Your conversation data and code are not used for model training** under the following conditions:
+
+| Provider | Free Tier | Paid API |
+|----------|-----------|----------|
+| **Claude** | May be used for training (opt-out available at [claude.ai/settings](https://claude.ai/settings/data-privacy-controls)) | **Not used for training** ([Commercial Terms](https://www.anthropic.com/legal/commercial-terms)) |
+| **Gemini** | May be used for training ([API Terms](https://ai.google.dev/gemini-api/terms)) | **Not used for training** |
+
+### What Claude Talk does to protect your data
+
+- **Telemetry disabled by default** — Claude Talk automatically sets the following environment variables for all CLI processes:
+
+  | Claude CLI | Gemini CLI |
+  |-----------|------------|
+  | `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` | `GEMINI_TELEMETRY_ENABLED=false` |
+  | *(disables Statsig metrics, Sentry errors, feedback, and surveys)* | `GEMINI_TELEMETRY_LOG_PROMPTS=false` |
+
+  Sources: [Claude Code Data Usage](https://code.claude.com/docs/en/data-usage) · [Gemini CLI Telemetry](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/telemetry.md)
+
+- **Code Mode is read-only** — In Code Mode, agents can only *read* files in your workspace (via `Read`, `Grep`, `Glob` tools for Claude; `--sandbox` for Gemini). They cannot modify, upload, or exfiltrate your code.
+- **Session-scoped context** — Code read during a debate lives only in that session's context. It is not indexed, embedded, or persisted beyond the CLI's standard retention period.
+
+### If you want maximum privacy
+
+- Use **paid API tiers** for both Claude and Gemini to ensure your data is contractually excluded from training.
+- For Claude free/Pro/Max users: opt out of training at [claude.ai/settings/data-privacy-controls](https://claude.ai/settings/data-privacy-controls).
+- Review each provider's full terms: [Anthropic Privacy](https://www.anthropic.com/legal/privacy) · [Gemini API Terms](https://ai.google.dev/gemini-api/terms)
+
+---
+
 ## Tips
 
 - **Use Code Mode** — click the `GEN` button to switch to `</>` mode, then debate about your actual codebase ("Is our auth secure?", "Should we refactor the data layer?")

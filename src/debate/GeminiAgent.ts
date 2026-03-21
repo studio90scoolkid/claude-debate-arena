@@ -19,6 +19,10 @@ let resolvedGeminiPath: string | null = null;
 function makeCleanEnv(): NodeJS.ProcessEnv {
   const env = { ...process.env };
   env.PATH = `${env.PATH}:/usr/local/bin:/opt/homebrew/bin`;
+  // Disable telemetry and prompt logging
+  // See: https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/telemetry.md
+  env.GEMINI_TELEMETRY_ENABLED = 'false';
+  env.GEMINI_TELEMETRY_LOG_PROMPTS = 'false';
   return env;
 }
 
