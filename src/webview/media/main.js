@@ -48,6 +48,8 @@
       consensusGaugeLabel: 'CONSENSUS',
       moderatorSummary: 'SUMMARY',
       summaryLoading: 'Preparing a summary...',
+      collapseSettings: 'Collapse settings',
+      expandSettings: 'Expand settings',
       modeGeneral: 'General Mode',
       modeCode: 'Code Mode (codebase-aware)',
       topicPlaceholderCode: 'Enter code topic... (e.g. Is our auth implementation secure?)',
@@ -93,6 +95,8 @@
       consensusGaugeLabel: '합의도',
       moderatorSummary: '토론 요약',
       summaryLoading: '토론을 요약하고 있습니다...',
+      collapseSettings: '설정 접기',
+      expandSettings: '설정 펼치기',
       modeGeneral: '일반 모드',
       modeCode: '코드 모드 (코드베이스 분석)',
       topicPlaceholderCode: '코드 주제를 입력하세요... (예: 우리 인증 구현이 안전한가?)',
@@ -133,6 +137,8 @@
       debateStopped: '討論終了 — 討論が中断されました。',
       concessionMessage: '敗北宣言 — {conceder}が{winner}に敗北を認めました。',
       consensusGaugeLabel: '合意度',
+      collapseSettings: '設定を折りたたむ',
+      expandSettings: '設定を展開',
       modeGeneral: '一般モード',
       modeCode: 'コードモード (コードベース分析)',
       topicPlaceholderCode: 'コードの話題を入力... (例: 認証の実装は安全か？)',
@@ -173,6 +179,8 @@
       debateStopped: '辩论结束 — 辩论已被中止。',
       concessionMessage: '认输 — {conceder}向{winner}认输了。',
       consensusGaugeLabel: '共识度',
+      collapseSettings: '折叠设置',
+      expandSettings: '展开设置',
     },
     // === European Languages ===
     de: {
@@ -800,6 +808,10 @@
   /** @type {HTMLInputElement} */
   const allowConcessionCheck = document.getElementById('allowConcession');
   /** @type {HTMLButtonElement} */
+  const settingsToggle = document.getElementById('settingsToggle');
+  /** @type {HTMLElement} */
+  const personaRow = document.getElementById('personaRow');
+  /** @type {HTMLButtonElement} */
   const modeBtn = document.getElementById('modeBtn');
   let currentMode = 'general'; // 'general' or 'code'
   /** @type {HTMLButtonElement} */
@@ -1382,6 +1394,7 @@
         modelB: modelBSelect.value,
         topic: topicInput.value,
         mode: currentMode,
+        settingsCollapsed: personaRow.classList.contains('collapsed') ? 'true' : 'false',
         seekConsensus: seekConsensusCheck.checked ? 'true' : 'false',
         showSummary: showSummaryCheck.checked ? 'true' : 'false',
         allowConcession: allowConcessionCheck.checked ? 'true' : 'false',
@@ -1410,10 +1423,27 @@
         topicInput.placeholder = t('topicPlaceholderCode');
       }
     }
+    if (s.settingsCollapsed === 'true') {
+      personaRow.classList.add('collapsed');
+      settingsToggle.textContent = '▼';
+      settingsToggle.title = t('expandSettings');
+    } else {
+      personaRow.classList.remove('collapsed');
+      settingsToggle.textContent = '▲';
+      settingsToggle.title = t('collapseSettings');
+    }
     if (s.seekConsensus) seekConsensusCheck.checked = s.seekConsensus === 'true';
     if (s.showSummary !== undefined) showSummaryCheck.checked = s.showSummary !== 'false';
     if (s.allowConcession !== undefined) allowConcessionCheck.checked = s.allowConcession !== 'false';
   }
+
+  // ===== Settings Panel Toggle =====
+  settingsToggle.addEventListener('click', () => {
+    const collapsed = personaRow.classList.toggle('collapsed');
+    settingsToggle.textContent = collapsed ? '▼' : '▲';
+    settingsToggle.title = collapsed ? t('expandSettings') : t('collapseSettings');
+    saveSettings();
+  });
 
   // ===== Event Handlers =====
   startBtn.addEventListener('click', () => {

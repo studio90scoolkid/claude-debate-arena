@@ -319,12 +319,42 @@ html[data-lang="fa"] .btn-group {
   color: #555;
 }
 
+/* ===== Settings Toggle ===== */
+.settings-toggle {
+  width: 100%;
+  background: rgba(0,0,0,0.15);
+  border: none;
+  border-top: 1px solid #4a4a6a;
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px 0;
+  line-height: 1;
+  transition: color 0.2s, background 0.2s;
+}
+
+.settings-toggle:hover {
+  color: var(--accent-yellow);
+  background: rgba(255, 213, 79, 0.08);
+}
+
 /* ===== Agent Config ===== */
 .persona-row {
   display: flex;
   gap: 12px;
   align-items: stretch;
   flex-wrap: nowrap;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+  max-height: 500px;
+  opacity: 1;
+  padding-top: 10px;
+}
+
+.persona-row.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
 }
 
 .agent-config {

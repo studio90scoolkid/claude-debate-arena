@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3] - 2026-03-22
+
+### Added
+- **Collapsible settings panel** — toggle button (▲/▼) to collapse/expand agent configuration, keeping the UI compact during debates
+- Settings panel collapse state persists across sessions via auto-save
+- i18n support for collapse/expand tooltips (EN, KO, JA, ZH)
+
 ## [0.6.2] - 2026-03-21
 
 ### Added

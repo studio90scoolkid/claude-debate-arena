@@ -92,7 +92,8 @@ export function getWebviewContent(
         <button id="stopBtn" class="ctrl-btn ctrl-stop" disabled data-i18n-title="stop">⏹</button>
       </div>
     </div>
-    <div class="persona-row">
+    <button id="settingsToggle" class="settings-toggle" data-i18n-title="collapseSettings">▲</button>
+    <div class="persona-row" id="personaRow">
       <div class="agent-config">
         <div class="agent-config-label agent-a-label">
           <input type="text" id="nameA" class="name-input agent-a-name" value="AGENT A" maxlength="20">
