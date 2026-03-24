@@ -289,7 +289,8 @@ export class GeminiAgent implements AIAgent {
       const geminiPath = findGeminiPath();
       const env = makeCleanEnv();
 
-      const args = ['-p', prompt, '--output-format', 'json', '-m', this.model];
+      // Pass prompt via stdin to avoid ARG_MAX limits and special-char parsing issues
+      const args = ['-p', '', '--output-format', 'json', '-m', this.model];
       if (this.mode === 'code') {
         args.push('--sandbox');
       }
@@ -307,14 +308,18 @@ export class GeminiAgent implements AIAgent {
       const safeResolve = (val: { text: string; usage?: TokenUsage }) => { if (!settled) { settled = true; resolve(val); } };
       const safeReject = (err: Error) => { if (!settled) { settled = true; reject(err); } };
 
-      const spawnOpts: { stdio: ['ignore', 'pipe', 'pipe']; env: NodeJS.ProcessEnv; cwd?: string } = {
-        stdio: ['ignore', 'pipe', 'pipe'],
+      const spawnOpts: { stdio: ['pipe', 'pipe', 'pipe']; env: NodeJS.ProcessEnv; cwd?: string } = {
+        stdio: ['pipe', 'pipe', 'pipe'],
         env,
       };
       if (this.mode === 'code' && this.cwd) {
         spawnOpts.cwd = this.cwd;
       }
       const proc = spawn(geminiPath, args, spawnOpts);
+
+      // Write prompt to stdin and close it
+      proc.stdin.write(prompt);
+      proc.stdin.end();
 
       let stdout = '';
       let stderr = '';

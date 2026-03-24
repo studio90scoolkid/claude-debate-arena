@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.5] - 2026-03-24
+
+### Fixed
+- **Gemini CLI prompt delivery** — prompts are now passed via stdin instead of command-line arguments, fixing crashes caused by long prompts exceeding OS argument limits or special characters being misinterpreted as CLI flags
+
 ## [0.6.4] - 2026-03-23
 
 ### Fixed
