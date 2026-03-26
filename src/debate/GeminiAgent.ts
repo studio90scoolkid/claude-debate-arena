@@ -290,14 +290,14 @@ export class GeminiAgent implements AIAgent {
       const env = makeCleanEnv();
 
       // Pass prompt via stdin to avoid ARG_MAX limits and special-char parsing issues
-      const args = ['-p', '', '--output-format', 'json', '-m', this.model];
+      const args = ['-p', '', '-m', this.model];
       if (this.mode === 'code') {
         args.push('--sandbox');
       }
-      if (!isFirstTurn && this.sessionId) {
-        // Resume existing session
-        args.push('--resume', this.sessionId);
-        log.appendLine(`[${this.name}] Resuming Gemini session ${this.sessionId} (turn=${this.turnCount})`);
+      if (!isFirstTurn && this.turnCount > 0) {
+        // Resume most recent session (Gemini CLI uses index/latest, not session IDs)
+        args.push('--resume', 'latest');
+        log.appendLine(`[${this.name}] Resuming Gemini session (turn=${this.turnCount})`);
       } else {
         log.appendLine(`[${this.name}] Starting new Gemini session (model=${this.model})`);
       }
@@ -361,6 +361,11 @@ export class GeminiAgent implements AIAgent {
           return;
         }
 
+        // Gemini CLI outputs plain text (no --output-format flag available).
+        // Try JSON first in case future versions add structured output.
+        let text = '';
+        let usage: TokenUsage | undefined;
+
         try {
           const parsed = JSON.parse(stdout);
 
@@ -370,13 +375,9 @@ export class GeminiAgent implements AIAgent {
             log.appendLine(`[${this.name}] Captured Gemini session ID: ${this.sessionId}`);
           }
 
-          // Extract response text — try common Gemini JSON fields
           const result = parsed.response || parsed.result || parsed.content || parsed.text || stdout;
-          const text = typeof result === 'string' ? result.trim() : JSON.stringify(result);
-          log.appendLine(`[${this.name}] Response (${text.length} chars): ${text.slice(0, 100)}...`);
+          text = typeof result === 'string' ? result.trim() : JSON.stringify(result);
 
-          // Extract token usage if available
-          let usage: TokenUsage | undefined;
           const stats = parsed.usage || parsed.statistics || parsed.stats;
           if (stats) {
             usage = {
@@ -385,17 +386,17 @@ export class GeminiAgent implements AIAgent {
             };
             log.appendLine(`[${this.name}] Tokens: in=${usage.inputTokens}, out=${usage.outputTokens}`);
           }
-
-          safeResolve({ text, usage });
         } catch {
-          const text = stdout.trim();
-          if (text) {
-            log.appendLine(`[${this.name}] Non-JSON response (${text.length} chars)`);
-            safeResolve({ text });
-          } else {
-            log.appendLine(`[${this.name}] Empty response!`);
-            safeReject(new Error(`Empty response from Gemini CLI. stderr: ${stderr.slice(0, 300)}`));
-          }
+          // Plain text response (expected for current Gemini CLI versions)
+          text = stdout.trim();
+        }
+
+        if (text) {
+          log.appendLine(`[${this.name}] Response (${text.length} chars): ${text.slice(0, 100)}...`);
+          safeResolve({ text, usage });
+        } else {
+          log.appendLine(`[${this.name}] Empty response!`);
+          safeReject(new Error(`Empty response from Gemini CLI. stderr: ${stderr.slice(0, 300)}`));
         }
       });
 

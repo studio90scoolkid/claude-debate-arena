@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.6] - 2026-03-26
+
+### Fixed
+- **Gemini CLI compatibility** — removed unsupported `--output-format json` flag that caused "exited with code 1" errors on all Gemini CLI versions
+- **Gemini session resume** — use `--resume latest` instead of non-existent session IDs, matching Gemini CLI's actual interface
+- **Gemini response parsing** — handle plain text responses as default, with JSON as optional fallback
+
 ## [0.6.5] - 2026-03-24
 
 ### Fixed
