@@ -57,6 +57,7 @@
       summaryLoading: 'Preparing a summary...',
       collapseSettings: 'Collapse settings',
       expandSettings: 'Expand settings',
+      settings: 'Settings',
       modeGeneral: 'General Mode',
       modeCode: 'Code Mode (codebase-aware)',
       topicPlaceholderCode: 'Enter code topic... (e.g. Is our auth implementation secure?)',
@@ -111,6 +112,7 @@
       summaryLoading: '토론을 요약하고 있습니다...',
       collapseSettings: '설정 접기',
       expandSettings: '설정 펼치기',
+      settings: '설정',
       modeGeneral: '일반 모드',
       modeCode: '코드 모드 (코드베이스 분석)',
       topicPlaceholderCode: '코드 주제를 입력하세요... (예: 우리 인증 구현이 안전한가?)',
@@ -162,6 +164,7 @@
       consensusGaugeLabel: '合意度',
       collapseSettings: '設定を折りたたむ',
       expandSettings: '設定を展開',
+      settings: '設定',
       modeGeneral: '一般モード',
       modeCode: 'コードモード (コードベース分析)',
       topicPlaceholderCode: 'コードの話題を入力... (例: 認証の実装は安全か？)',
@@ -213,6 +216,7 @@
       consensusGaugeLabel: '共识度',
       collapseSettings: '折叠设置',
       expandSettings: '展开设置',
+      settings: '设置',
     },
     // === European Languages ===
     de: {
@@ -948,6 +952,10 @@
   /** @type {HTMLInputElement} */
   const allowConcessionCheck = document.getElementById('allowConcession');
   /** @type {HTMLButtonElement} */
+  const debateSettingsBtn = document.getElementById('debateSettingsBtn');
+  /** @type {HTMLElement} */
+  const debateSettingsPopup = document.getElementById('debateSettingsPopup');
+  /** @type {HTMLButtonElement} */
   const settingsToggle = document.getElementById('settingsToggle');
   /** @type {HTMLElement} */
   const personaRow = document.getElementById('personaRow');
@@ -1642,6 +1650,8 @@
     if (s.seekConsensus) seekConsensusCheck.checked = s.seekConsensus === 'true';
     if (s.showSummary !== undefined) showSummaryCheck.checked = s.showSummary !== 'false';
     if (s.allowConcession !== undefined) allowConcessionCheck.checked = s.allowConcession !== 'false';
+    debateSettingsPopup.style.display = 'none';
+    debateSettingsBtn.classList.remove('active');
   }
 
   // ===== Settings Panel Toggle =====
@@ -1650,6 +1660,26 @@
     settingsToggle.textContent = collapsed ? '▼' : '▲';
     settingsToggle.title = collapsed ? t('expandSettings') : t('collapseSettings');
     saveSettings();
+  });
+
+  // ===== Debate Settings Popup =====
+  debateSettingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const visible = debateSettingsPopup.style.display !== 'none';
+    if (!visible) {
+      const rect = debateSettingsBtn.getBoundingClientRect();
+      debateSettingsPopup.style.top = (rect.bottom + 4) + 'px';
+      debateSettingsPopup.style.right = (window.innerWidth - rect.right) + 'px';
+    }
+    debateSettingsPopup.style.display = visible ? 'none' : 'flex';
+    debateSettingsBtn.classList.toggle('active', !visible);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!debateSettingsPopup.contains(e.target) && e.target !== debateSettingsBtn) {
+      debateSettingsPopup.style.display = 'none';
+      debateSettingsBtn.classList.remove('active');
+    }
   });
 
   // ===== Event Handlers =====

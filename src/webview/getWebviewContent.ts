@@ -84,6 +84,8 @@ export function getWebviewContent(
         <span class="conn-account" id="connAccountCodex"></span>
       </span>
       <button class="conn-refresh" id="connRefresh" title="Refresh">&#x21bb;</button>
+      <span class="conn-divider">|</span>
+      <button id="debateSettingsBtn" class="top-bar-settings" data-i18n-title="settings">&#x2699;</button>
     </div>
   </div>
 
@@ -181,21 +183,24 @@ export function getWebviewContent(
           </div>
         </div>
       </div>
-      <div class="btn-group">
-        <label class="consensus-label">
-          <input type="checkbox" id="seekConsensus">
-          <span data-i18n="seekConsensus"></span>
-        </label>
-        <label class="consensus-label">
-          <input type="checkbox" id="showSummary" checked>
-          <span data-i18n="showSummary"></span>
-        </label>
-        <label class="consensus-label">
-          <input type="checkbox" id="allowConcession" checked>
-          <span data-i18n="allowConcession"></span>
-        </label>
-      </div>
     </div>
+  </div>
+
+  <!-- Debate Settings Popup -->
+  <div id="debateSettingsPopup" class="debate-settings-popup" style="display:none;">
+    <div class="debate-settings-title" data-i18n="settings"></div>
+    <label class="consensus-label">
+      <input type="checkbox" id="seekConsensus">
+      <span data-i18n="seekConsensus"></span>
+    </label>
+    <label class="consensus-label">
+      <input type="checkbox" id="showSummary" checked>
+      <span data-i18n="showSummary"></span>
+    </label>
+    <label class="consensus-label">
+      <input type="checkbox" id="allowConcession" checked>
+      <span data-i18n="allowConcession"></span>
+    </label>
   </div>
 
   <!-- Chat Area -->

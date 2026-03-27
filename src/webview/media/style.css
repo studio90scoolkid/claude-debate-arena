@@ -64,12 +64,6 @@ html[data-lang="fa"] .bubble-time {
   text-align: left;
 }
 
-html[data-lang="ar"] .btn-group,
-html[data-lang="he"] .btn-group,
-html[data-lang="fa"] .btn-group {
-  margin-left: 0;
-  margin-right: auto;
-}
 
 /* ===== Pixel Border Utility ===== */
 .pixel-border {
@@ -260,6 +254,49 @@ html[data-lang="fa"] .btn-group {
   background: #c62828;
   border-color: #ef5350;
   box-shadow: 2px 2px 0 #8e0000;
+}
+
+.top-bar-settings {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: color 0.2s;
+}
+
+.top-bar-settings:hover {
+  color: var(--accent-yellow);
+}
+
+.top-bar-settings.active {
+  color: var(--accent-yellow);
+}
+
+/* ===== Debate Settings Popup ===== */
+.debate-settings-popup {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  background: var(--bg-dark);
+  border: 2px solid #4a4a6a;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+  min-width: 160px;
+}
+
+.debate-settings-title {
+  font-size: 9px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #4a4a6a;
+  margin-bottom: 2px;
 }
 
 .ctrl-mode {
@@ -508,19 +545,6 @@ html[data-lang="fa"] .btn-group {
   box-shadow: 3px 3px 0 #0d47a1, inset -1px -1px 0 rgba(0,0,0,0.3), inset 1px 1px 0 rgba(255,255,255,0.2);
 }
 
-.btn-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.btn-group .rpg-btn {
-  width: 100%;
-  padding: 6px 14px;
-  font-size: 11px;
-}
 
 .consensus-label {
   display: flex;

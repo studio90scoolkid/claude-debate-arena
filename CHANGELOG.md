@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.3] - 2026-03-27
+
+### Changed
+- Move debate option checkboxes (Seek Consensus, Show Summary, Allow Concession) into a settings popup accessible via gear icon in the top bar
+- Settings popup closes on outside click, stays closed on restart, and remains accessible during debates (with checkboxes disabled)
+
 ## [0.7.2] - 2026-03-27
 
 ### Changed
