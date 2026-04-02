@@ -235,6 +235,7 @@ export class ClaudeAgent implements AIAgent {
     public readonly allowConcession: boolean = true,
     public readonly mode: DebateMode = 'general',
     public readonly cwd?: string,
+    public readonly agentSlot?: 'A' | 'B',
   ) {
     this.sessionId = randomUUID();
   }
@@ -264,6 +265,7 @@ export class ClaudeAgent implements AIAgent {
       allowConcession: this.allowConcession,
       turnCount: this.turnCount,
       mode: this.mode,
+      agentSlot: this.agentSlot,
     };
   }
 
@@ -271,6 +273,7 @@ export class ClaudeAgent implements AIAgent {
     prompt: string,
     signal?: AbortSignal,
     isNewSession = false,
+    _retryCount = 0,
   ): Promise<{ text: string; usage?: TokenUsage }> {
     return new Promise((resolve, reject) => {
       if (signal?.aborted) {
@@ -348,6 +351,13 @@ export class ClaudeAgent implements AIAgent {
         if (stderr) { log.appendLine(`[${this.name}] stderr: ${stderr.slice(0, 500)}`); }
 
         if (code !== 0) {
+          // Session ID collision — regenerate and retry once
+          if (isNewSession && stderr.includes('already in use') && _retryCount === 0) {
+            this.sessionId = randomUUID();
+            log.appendLine(`[${this.name}] Session ID conflict, retrying with ${this.sessionId}`);
+            this.callClaude(prompt, signal, true, 1).then(safeResolve, safeReject);
+            return;
+          }
           safeReject(new Error(`Claude CLI exited with code ${code}: ${stderr.slice(0, 300)}`));
           return;
         }

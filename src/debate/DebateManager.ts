@@ -7,6 +7,20 @@ import { AIAgent, DebateMessage, DebateMode, DebateState, ModelAlias, Persona, P
 
 const MAX_MESSAGES = 200;
 
+/** Valid model aliases per provider — prevents cross-provider model assignment */
+const PROVIDER_MODELS: Record<Provider, readonly string[]> = {
+  claude: ['haiku', 'sonnet', 'opus'],
+  gemini: ['gemini-2.5-flash', 'gemini-2.5-pro'],
+  codex: ['gpt-5.4', 'gpt-5.4-mini', 'o4-mini', 'o3-mini'],
+};
+
+/** Default model per provider */
+const DEFAULT_MODEL: Record<Provider, ModelAlias> = {
+  claude: 'sonnet',
+  gemini: 'gemini-2.5-flash',
+  codex: 'gpt-5.4-mini',
+};
+
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -106,8 +120,8 @@ export class DebateManager extends EventEmitter {
     this._providerB = providerB;
 
     // Create persistent agents with their own sessions
-    this.agentA = this.createAgent(providerA, this._nameA, personaA, modelA, this._nameB, seekConsensus, allowConcession, mode, cwd);
-    this.agentB = this.createAgent(providerB, this._nameB, personaB, modelB, this._nameA, seekConsensus, allowConcession, mode, cwd);
+    this.agentA = this.createAgent(providerA, this._nameA, personaA, modelA, this._nameB, seekConsensus, allowConcession, mode, cwd, 'A');
+    this.agentB = this.createAgent(providerB, this._nameB, personaB, modelB, this._nameA, seekConsensus, allowConcession, mode, cwd, 'B');
 
     this.abortController = new AbortController();
     const myLoopId = ++this.loopId;
@@ -284,14 +298,18 @@ export class DebateManager extends EventEmitter {
     allowConcession: boolean,
     mode: DebateMode = 'general',
     cwd?: string,
+    agentSlot?: 'A' | 'B',
   ): AIAgent {
+    // Validate model belongs to provider; fall back to default if mismatched
+    const validModel = PROVIDER_MODELS[provider].includes(model) ? model : DEFAULT_MODEL[provider];
+
     if (provider === 'gemini') {
-      return new GeminiAgent(name, persona, model as any, opponentName, seekConsensus, allowConcession, mode, cwd);
+      return new GeminiAgent(name, persona, validModel as any, opponentName, seekConsensus, allowConcession, mode, cwd, agentSlot);
     }
     if (provider === 'codex') {
-      return new CodexAgent(name, persona, model as any, opponentName, seekConsensus, allowConcession, mode, cwd);
+      return new CodexAgent(name, persona, validModel as any, opponentName, seekConsensus, allowConcession, mode, cwd, agentSlot);
     }
-    return new ClaudeAgent(name, persona, model as any, opponentName, seekConsensus, allowConcession, mode, cwd);
+    return new ClaudeAgent(name, persona, validModel as any, opponentName, seekConsensus, allowConcession, mode, cwd, agentSlot);
   }
 
   private emitStateChange(): void {
@@ -344,7 +362,7 @@ ${transcript}
     let cliPath: string;
     let env: NodeJS.ProcessEnv;
     let args: string[];
-    if (hasClaudeProvider || (!hasGeminiProvider && this._providerA !== 'codex')) {
+    if (hasClaudeProvider) {
       cliPath = findClaudePath();
       env = makeCleanEnv();
       args = ['-p', prompt, '--output-format', 'json', '--model', 'opus'];

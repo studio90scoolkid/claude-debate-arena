@@ -1824,7 +1824,7 @@
           ps.checkDone = true;
           ps.available = !!conn.available;
           if (conn.subscription) ps.tier = conn.subscription.toLowerCase();
-          else if (conn.tier) ps.tier = conn.tier;
+          else if (conn.tier) ps.tier = conn.tier.toLowerCase();
           const status = ps.available ? 'connected' : (conn.installed === false ? 'disconnected' : (conn.installed ? 'warning' : 'disconnected'));
           setProviderStatus(p, status);
           if (ps.available) {
@@ -1850,7 +1850,7 @@
             ps.checkDone = true;
             ps.available = !!conn[p + 'Available'];
             const tier = conn[p + 'Tier'];
-            if (tier) ps.tier = p === 'claude' ? tier.toLowerCase() : tier;
+            if (tier) ps.tier = tier.toLowerCase();
             const installed = conn[p + 'Installed'];
             const status = ps.available ? 'connected' : (installed ? 'warning' : 'disconnected');
             setProviderStatus(p, status);

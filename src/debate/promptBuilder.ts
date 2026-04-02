@@ -11,6 +11,8 @@ export interface PromptConfig {
   allowConcession: boolean;
   turnCount: number;
   mode?: DebateMode;
+  /** Which agent slot this config belongs to: 'A' or 'B' */
+  agentSlot?: 'A' | 'B';
 }
 
 /** System prompt: persistent persona + topic anchoring for the entire session */
@@ -107,7 +109,7 @@ CODE MODE: Before stating your position, explore the codebase to find relevant f
 export function buildDebateProgress(config: PromptConfig, history: DebateMessage[]): string {
   if (history.length <= 1) { return ''; }
 
-  const myAgent = config.persona === 'pro' || config.persona === 'neutral' ? 'A' : 'B';
+  const myAgent = config.agentSlot || (config.persona === 'pro' || config.persona === 'neutral' ? 'A' : 'B');
   const myMsgs = history.filter(m => m.agent === myAgent);
   const opMsgs = history.filter(m => m.agent !== myAgent);
 

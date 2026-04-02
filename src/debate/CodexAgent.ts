@@ -194,6 +194,7 @@ export class CodexAgent implements AIAgent {
     public readonly allowConcession: boolean = true,
     public readonly mode: DebateMode = 'general',
     public readonly cwd?: string,
+    public readonly agentSlot?: 'A' | 'B',
   ) {}
 
   async respond(
@@ -223,6 +224,7 @@ export class CodexAgent implements AIAgent {
       allowConcession: this.allowConcession,
       turnCount: this.turnCount,
       mode: this.mode,
+      agentSlot: this.agentSlot,
     };
   }
 

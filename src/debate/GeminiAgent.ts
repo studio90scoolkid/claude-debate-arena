@@ -231,6 +231,7 @@ export class GeminiAgent implements AIAgent {
     public readonly allowConcession: boolean = true,
     public readonly mode: DebateMode = 'general',
     public readonly cwd?: string,
+    public readonly agentSlot?: 'A' | 'B',
   ) {}
 
   async respond(
@@ -261,6 +262,7 @@ export class GeminiAgent implements AIAgent {
       allowConcession: this.allowConcession,
       turnCount: this.turnCount,
       mode: this.mode,
+      agentSlot: this.agentSlot,
     };
   }
 
@@ -296,10 +298,14 @@ export class GeminiAgent implements AIAgent {
       if (this.mode === 'code') {
         args.push('--sandbox');
       }
-      if (!isFirstTurn && this.turnCount > 0) {
-        // Resume most recent session (Gemini CLI uses index/latest, not session IDs)
+      if (!isFirstTurn && this.sessionId) {
+        // Resume the specific session captured from a previous turn
+        args.push('--resume', this.sessionId);
+        log.appendLine(`[${this.name}] Resuming Gemini session ${this.sessionId} (turn=${this.turnCount})`);
+      } else if (!isFirstTurn && this.turnCount > 0) {
+        // Fallback to 'latest' if no session ID was captured (plain text output)
         args.push('--resume', 'latest');
-        log.appendLine(`[${this.name}] Resuming Gemini session (turn=${this.turnCount})`);
+        log.appendLine(`[${this.name}] Resuming Gemini session (latest, turn=${this.turnCount})`);
       } else {
         log.appendLine(`[${this.name}] Starting new Gemini session (model=${this.model})`);
       }

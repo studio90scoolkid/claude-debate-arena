@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.5] - 2026-04-02
+
+### Fixed
+- Fix Claude CLI "Session ID already in use" error by auto-retrying with a new session ID (with retry cap)
+- Fix Gemini session resume using `--resume latest` which could resume wrong session; now uses captured session ID when available
+- Fix neutral persona always treated as Agent A in debate progress summary, causing wrong message attribution when Agent B is neutral
+- Fix tier string normalization inconsistency causing paid-tier models to appear locked for Gemini/Codex users
+- Fix cross-provider model assignment (e.g. Claude model sent to Gemini) by adding runtime validation with safe fallback
+- Simplify summary generation provider selection logic
+
 ## [0.7.4] - 2026-03-31
 
 ### Fixed
