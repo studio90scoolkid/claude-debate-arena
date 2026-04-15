@@ -1,4 +1,5 @@
-import { spawn, execSync } from 'child_process';
+import { execSync } from 'child_process';
+import { spawnCli } from './spawnCli';
 import { randomUUID } from 'crypto';
 import * as os from 'os';
 import * as vscode from 'vscode';
@@ -129,7 +130,7 @@ function runCliCommand(
 ): Promise<{ code: number | null; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
     const env = makeCleanEnv();
-    const proc = spawn(binPath, args, {
+    const proc = spawnCli(binPath, args, {
       stdio: ['ignore', 'pipe', 'pipe'],
       env,
     });
@@ -313,7 +314,7 @@ export class ClaudeAgent implements AIAgent {
       if (this.mode === 'code' && this.cwd) {
         spawnOpts.cwd = this.cwd;
       }
-      const proc = spawn(claudePath, args, spawnOpts);
+      const proc = spawnCli(claudePath, args, spawnOpts);
 
       let stdout = '';
       let stderr = '';

@@ -1,4 +1,5 @@
-import { spawn, execSync } from 'child_process';
+import { execSync } from 'child_process';
+import { spawnCli } from './spawnCli';
 import * as os from 'os';
 import * as vscode from 'vscode';
 import { AIAgent, Persona, GeminiModelAlias, DebateMessage, DebateMode, TokenUsage } from './types';
@@ -145,7 +146,7 @@ export async function checkGeminiAuth(): Promise<{ loggedIn: boolean; installed?
 
   // Step 1: Check installation via --version
   const installed = await new Promise<boolean>((resolve) => {
-    const proc = spawn(geminiPath, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'], env });
+    const proc = spawnCli(geminiPath, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'], env });
     const timeout = setTimeout(() => { try { proc.kill('SIGTERM'); } catch { /* */ } resolve(false); }, 10_000);
     proc.on('close', (code) => { clearTimeout(timeout); resolve(code === 0); });
     proc.on('error', () => { clearTimeout(timeout); resolve(false); });
@@ -323,7 +324,7 @@ export class GeminiAgent implements AIAgent {
       if (this.mode === 'code' && this.cwd) {
         spawnOpts.cwd = this.cwd;
       }
-      const proc = spawn(geminiPath, args, spawnOpts);
+      const proc = spawnCli(geminiPath, args, spawnOpts);
 
       // Write prompt to stdin and close it
       proc.stdin.write(prompt);

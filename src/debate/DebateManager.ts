@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
-import { ChildProcess, spawn } from 'child_process';
+import { ChildProcess } from 'child_process';
+import { spawnCli } from './spawnCli';
 import { ClaudeAgent, findClaudePath, makeCleanEnv } from './ClaudeAgent';
 import { GeminiAgent, findGeminiPath } from './GeminiAgent';
 import { CodexAgent, findCodexPath } from './CodexAgent';
@@ -377,7 +378,7 @@ ${transcript}
       args = ['exec', prompt, '-m', 'gpt-5.4', '--json', '--full-auto'];
     }
 
-    const proc = spawn(cliPath, args, {
+    const proc = spawnCli(cliPath, args, {
       stdio: ['ignore', 'pipe', 'pipe'],
       env,
     });

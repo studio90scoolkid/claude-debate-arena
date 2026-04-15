@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.6] - 2026-04-15
+
+### Fixed
+- Fix `spawn EINVAL` on Windows when launching CLI wrappers (`claude.cmd`, `gemini.cmd`, `codex.cmd`) caused by Node.js CVE-2024-27980 restriction; added a `spawnCli` helper that routes `.cmd`/`.bat` through `shell: true` with proper argument escaping
+
 ## [0.7.5] - 2026-04-02
 
 ### Fixed

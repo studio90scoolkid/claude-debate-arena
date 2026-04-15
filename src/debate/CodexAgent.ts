@@ -1,4 +1,5 @@
-import { spawn, execSync } from 'child_process';
+import { execSync } from 'child_process';
+import { spawnCli } from './spawnCli';
 import * as os from 'os';
 import * as vscode from 'vscode';
 import { AIAgent, Persona, CodexModelAlias, DebateMessage, DebateMode, TokenUsage } from './types';
@@ -128,7 +129,7 @@ export async function checkCodexAuth(): Promise<{ loggedIn: boolean; installed?:
 
   // Step 1: Check installation via --version
   const installed = await new Promise<boolean>((resolve) => {
-    const proc = spawn(codexPath, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'], env });
+    const proc = spawnCli(codexPath, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'], env });
     const timeout = setTimeout(() => { try { proc.kill('SIGTERM'); } catch { /* */ } resolve(false); }, 10_000);
     proc.on('close', (code) => { clearTimeout(timeout); resolve(code === 0); });
     proc.on('error', () => { clearTimeout(timeout); resolve(false); });
@@ -147,7 +148,7 @@ export async function checkCodexAuth(): Promise<{ loggedIn: boolean; installed?:
 
   // Check codex login status
   const authResult = await new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve) => {
-    const proc = spawn(codexPath, ['login', 'status'], { stdio: ['ignore', 'pipe', 'pipe'], env });
+    const proc = spawnCli(codexPath, ['login', 'status'], { stdio: ['ignore', 'pipe', 'pipe'], env });
     let stdout = '';
     let stderr = '';
     proc.stdout.on('data', (data: Buffer) => { stdout += data.toString(); });
@@ -270,7 +271,7 @@ export class CodexAgent implements AIAgent {
       if (this.mode === 'code' && this.cwd) {
         spawnOpts.cwd = this.cwd;
       }
-      const proc = spawn(codexPath, args, spawnOpts);
+      const proc = spawnCli(codexPath, args, spawnOpts);
 
       // Write prompt to stdin and close it
       proc.stdin.write(prompt);
